@@ -7,8 +7,6 @@ import re
 import os
 from fh_gui import FaceHuntInputSelection
 
-# pattern = r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+'
-
 def main():
     root = tk.Tk()
     app = FaceHuntInputSelection(root)
@@ -16,5 +14,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

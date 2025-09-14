@@ -3,8 +3,8 @@ from tkinter import filedialog, messagebox
 from tkinter import ttk
 import cv2
 import os
-import re
 import yt_dlp
+from fh_downloader import VideoDownloader
 
 class FaceHuntInputSelection:
     def __init__ (self, root):
@@ -12,8 +12,12 @@ class FaceHuntInputSelection:
         self.root.title("FaceHunt - Image and YouTube Link Selection")
         self.root.geometry("600x300")
 
-        self.image_path = tk.StringVar()
-        self.youtube_url = tk.StringVar()
+        self.image_path = tk.StringVar(value="")
+        self.youtube_url = tk.StringVar(value="")
+        self.youtube_url.trace("w", lambda *args: setattr(self, "url_validated", False)) # Reset the URL validation whenever its value changes
+        self.image_validated = False
+        self.url_validated = False
+        self.video_path = None
 
         # --- Imagen ---
         tk.Label(root, text = "Select an image (JPG/PNG/WebP)").pack(pady = 5)
@@ -26,10 +30,13 @@ class FaceHuntInputSelection:
         tk.Entry(root, textvariable=self.youtube_url, width=50).pack(pady=5)
         tk.Button(root, text="Validate YouTube URL", command=self.validate_yt_url).pack(pady=10)
 
+        tk.Button(root, text="Next Step", command=self.next_step).pack(pady=10)
+
     def select_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.webp")])
         if file_path:
             self.image_path.set(file_path)
+            self.image_validated = False
 
     def validate_image(self):
         '''Validates the reference image (JPG/PNG/WebP) by checking path, existence, extension, and loading.
@@ -49,6 +56,7 @@ class FaceHuntInputSelection:
         if img is None:
             messagebox.showerror("Error", "The image could not be loaded. Please verify it is not corrupted.")
             return
+        self.image_validated = True
         messagebox.showinfo("Success", f"Valid image: {file_test}")
 
     def validate_yt_url(self):
@@ -59,9 +67,10 @@ class FaceHuntInputSelection:
         try:
             with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
                 info = ydl.extract_info(yt_url, download=False)
-
-            messagebox.showinfo("Success", f"Valid YouTube video: {yt_url.title}")
+            self.url_validated = True
+            messagebox.showinfo("Success", f"Valid YouTube video: {info['title']}")
         except Exception as e:
+            self.url_validated = False
             messagebox.showerror("Error", f"Invalid YouTube link or video not accessible.\nDetails: {e}")
             return
 
@@ -80,19 +89,16 @@ class FaceHuntInputSelection:
         self.progress_bar.pack(pady=5, fill="x", padx=10)
 
     def next_step(self):
-        if not self.validate_image:
-            self.validate_image()
-        if not self.validate_yt_url:
-            self.validate_yt_url()
+        """Validates image and URL, clears the window, and shows the download interface."""
         if not (self.image_validated and self.url_validated):
             messagebox.showerror("Error", "Please validate both image and YouTube link.")
             return
         self.clear_window()
         self.download_ui()
 
-    def start_download:
+    def start_download(self):
         """Starts the download using VideoDownloader."""
-        downloader = VideoDownloader(self.root, self.progress, self.youtube_url.get)
+        downloader = VideoDownloader(self.root, self.progress, self.youtube_url.get())
         self.video_path = downloader.download()
         if self.video_path:
             messagebox.showinfo("Success", f"Video downloaded successfully: {self.video_path}")
