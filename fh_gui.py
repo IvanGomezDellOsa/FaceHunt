@@ -10,7 +10,7 @@ class FaceHuntInputSelection:
     def __init__ (self, root):
         self.root = root
         self.root.title("FaceHunt - Image and YouTube Link Selection")
-        self.root.geometry("600x300")
+        self.root.geometry("800x400")
 
         self.image_path = tk.StringVar(value="")
         self.youtube_url = tk.StringVar(value="")
@@ -24,11 +24,15 @@ class FaceHuntInputSelection:
         tk.Entry(root, textvariable = self.image_path, width=40).pack(pady = 10)
         tk.Button(root, text = "Browse Image", command = self.select_image).pack(pady=5)
         tk.Button(root, text = "Validate Image", command = self.validate_image).pack(pady = 15)
+        self.image_status = tk.Label(root, text="✗", fg="red", font=("arial", 14))
+        self.image_status.pack(pady=2)
 
         # --- YouTube ---
         tk.Label(root, text="Enter YouTube link:").pack(pady=5)
         tk.Entry(root, textvariable=self.youtube_url, width=50).pack(pady=5)
         tk.Button(root, text="Validate YouTube URL", command=self.validate_yt_url).pack(pady=10)
+        self.url_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
+        self.url_status.pack(pady=2)
 
         tk.Button(root, text="Next Step", command=self.next_step).pack(pady=10)
 
@@ -37,6 +41,7 @@ class FaceHuntInputSelection:
         if file_path:
             self.image_path.set(file_path)
             self.image_validated = False
+            self.update_status()
 
     def validate_image(self):
         '''Validates the reference image (JPG/PNG/WebP) by checking path, existence, extension, and loading.
@@ -58,6 +63,7 @@ class FaceHuntInputSelection:
             return
         self.image_validated = True
         messagebox.showinfo("Success", f"Valid image: {file_test}")
+        self.update_status()
 
     def validate_yt_url(self):
         yt_url = self.youtube_url.get()
@@ -73,13 +79,26 @@ class FaceHuntInputSelection:
             self.url_validated = False
             messagebox.showerror("Error", f"Invalid YouTube link or video not accessible.\nDetails: {e}")
             return
+        self.update_status()
+
+    def update_status(self):
+        """Update the status labels with (✓) or (✗) and colors."""
+        if self.image_validated:
+            self.image_status.config(text="✓", fg="green")
+        else:
+            self.image_status.config(text="✗", fg="red")
+
+        if self.url_validated:
+            self.url_status.config(text="✓", fg="green")
+        else:
+            self.url_status.config(text="✗", fg="red")
 
     def clear_window(self):
         """Destroys all widgets in the main window."""
         for widget in self.root.winfo_children():
             widget.destroy()
 
-    def download_ui(self):
+    def setup_download_ui(self):
         """Sets up the download interface."""
         self.root.title("FaceHunt - Video Download")
         tk.Label(self.root, text="Download YouTube video").pack(pady=5)
@@ -94,7 +113,7 @@ class FaceHuntInputSelection:
             messagebox.showerror("Error", "Please validate both image and YouTube link.")
             return
         self.clear_window()
-        self.download_ui()
+        self.setup_download_ui()
 
     def start_download(self):
         """Starts the download using VideoDownloader."""

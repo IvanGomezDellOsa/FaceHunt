@@ -48,7 +48,7 @@ class VideoDownloader:
             }
 
             self.progress_var.set(0)
-            messagebox.showinfo("Info", "Starting download...")
+            print("Starting download...")
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([self.youtube_url])
             return video_file
