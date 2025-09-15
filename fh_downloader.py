@@ -3,6 +3,7 @@ import shutil
 import yt_dlp
 from tkinter import messagebox
 
+
 class VideoDownloader:
     def __init__(self, root, progress_var, youtube_url):
         self.root = root
@@ -15,7 +16,7 @@ class VideoDownloader:
         try:
             os.makedirs(self.output_dir, exist_ok=True)
 
-            #Extract metadata from the video
+            # Extract metadata from the video
             with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
                 info = ydl.extract_info(self.youtube_url, download=False)
                 video_title = info['title']
@@ -23,18 +24,19 @@ class VideoDownloader:
 
             estimated_size = info.get('filesize_approx', 0)
             if not estimated_size:
-                estimated_size = 800 * 1024 * 1024 # 800 MB if info.get fails
+                estimated_size = 800 * 1024 * 1024  # 800 MB if info.get fails
 
             # Check disk space
             disk_usage = shutil.disk_usage(self.output_dir)
-            if disk_usage.free < estimated_size * 1.1: # %10+
-                messagebox.showerror("Error",f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024)} MB.")
+            if disk_usage.free < estimated_size * 1.1:  # %10+
+                messagebox.showerror("Error",
+                                     f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024)} MB.")
                 return None
             if not os.access(self.output_dir, os.W_OK):
                 messagebox.showerror("Error", "No write permissions in videos directory.")
                 return None
 
-            #Avoid multiple downloads
+            # Avoid multiple downloads
             if os.path.exists(video_file):
                 return video_file
 

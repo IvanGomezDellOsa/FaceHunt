@@ -5,26 +5,33 @@ import cv2
 import os
 import yt_dlp
 from fh_downloader import VideoDownloader
+from deepface import DeepFace
+import numpy as np
+import tempfile
+import shutil
+
 
 class FaceHuntInputSelection:
-    def __init__ (self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("FaceHunt - Image and YouTube Link Selection")
         self.root.geometry("800x400")
 
         self.image_path = tk.StringVar(value="")
         self.youtube_url = tk.StringVar(value="")
-        self.youtube_url.trace("w", lambda *args: setattr(self, "url_validated", False)) # Reset the URL validation whenever its value changes
+        self.youtube_url.trace("w", lambda *args: setattr(self, "url_validated",
+                                                          False))  # Reset URL validation when value changes
         self.image_validated = False
         self.url_validated = False
         self.video_path = None
+        self.reference_face_embedding = None
 
         # --- Imagen ---
-        tk.Label(root, text = "Select an image (JPG/PNG/WebP)").pack(pady = 5)
-        tk.Entry(root, textvariable = self.image_path, width=40).pack(pady = 10)
-        tk.Button(root, text = "Browse Image", command = self.select_image).pack(pady=5)
-        tk.Button(root, text = "Validate Image", command = self.validate_image).pack(pady = 15)
-        self.image_status = tk.Label(root, text="✗", fg="red", font=("arial", 14))
+        tk.Label(root, text="Select an image (JPG/PNG/WebP)").pack(pady=5)
+        tk.Entry(root, textvariable=self.image_path, width=40).pack(pady=10)
+        tk.Button(root, text="Browse Image", command=self.select_image).pack(pady=5)
+        tk.Button(root, text="Validate Image", command=self.validate_image).pack(pady=15)
+        self.image_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
         self.image_status.pack(pady=2)
 
         # --- YouTube ---
@@ -37,35 +44,111 @@ class FaceHuntInputSelection:
         tk.Button(root, text="Next Step", command=self.next_step).pack(pady=10)
 
     def select_image(self):
+        """Open file dialog to select an image file."""
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.webp")])
         if file_path:
             self.image_path.set(file_path)
             self.image_validated = False
             self.update_status()
 
-    def validate_image(self):
-        '''Validates the reference image (JPG/PNG/WebP) by checking path, existence, extension, and loading.
-            Uses prior validations to display specific errors instead of a generic message if the image fails to load.'''
+    def _create_temp_image_copy(self, file_path):
+        """
+            Create a temporary copy of the image with a safe name (ASCII).
+            Return the temporary path.
+        """
+        _, ext = os.path.splitext(file_path)
+        temp_fd, temp_path = tempfile.mkstemp(suffix=ext)
+        os.close(temp_fd)
+        shutil.copyfile(file_path, temp_path)
+        return temp_path
 
-        file_test = self.image_path.get()
-        if not file_test:
+    def extract_face_embedding(self, file_path):
+        '''
+            Extract the facial embedding from the image using DeepFace with Facenet.
+            1. Verify that the image can be opened and decoded from bytes
+            2. Create a temporary copy of the image with a safe ASCII name
+                (required because DeepFace fail with non-ASCII paths).
+            3. Use DeepFace.represent() to compute the facial embedding.
+            4. Validate that exactly one face is detected in the image.
+            Returns: tuple: (success: bool, embedding: list or None, error_message: str or None)
+        '''
+        temp_path = None
+        try:
+            with open(file_path, 'rb') as f:
+                img_bytes = f.read()
+            img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+            if img is None:
+                return False, None, "The image could not be loaded. Please verify it is not corrupted."
+
+            temp_path = self._create_temp_image_copy(file_path)
+
+            result = DeepFace.represent(
+                img_path=temp_path,
+                model_name="Facenet",
+                enforce_detection=True
+            )
+
+            if len(result) == 0:
+                return False, None, "No faces detected in the image."
+
+            if len(result) > 1:
+                return False, None, "Multiple faces detected. Please use an image with exactly one face."
+
+            embedding = result[0]["embedding"]
+            return True, embedding, None
+
+        except ValueError as e:
+            return False, None, f"Face detection failed: {str(e)}"
+        except Exception as e:
+            return False, None, f"Unexpected error during face embedding extraction: {str(e)}"
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    def validate_image(self):
+        """
+        Validates the reference image and extracts facial embedding.
+
+        Performs progressive validation:
+        1. File selection check
+        2. File existence check
+        3. Supported format check (.jpg/.png/.webp)
+        4. Delegate to extract_face_embedding() to ensure the image is readable
+            and contains exactly one face.
+
+        On success:
+        - Stores the extracted embedding in self.reference_face_embedding.
+        - Sets self.image_validated = True.
+        - Updates the GUI status and shows a success message.
+        """
+        self.image_validated = False
+        file_path = self.image_path.get()
+
+        if not file_path:
             messagebox.showerror("Error", "Please select an image file.")
             return
-        if not os.path.exists(file_test):
+
+        if not os.path.exists(file_path):
             messagebox.showerror("Error", "The image does not exist.")
             return
-        if not file_test.lower().endswith(('.jpg', '.png', '.webp')):
+
+        if not file_path.lower().endswith(('.jpg', '.png', '.webp')):
             messagebox.showerror("Error", "Only JPG, PNG, or WebP files are accepted.")
             return
-        img = cv2.imread(file_test)
-        if img is None:
-            messagebox.showerror("Error", "The image could not be loaded. Please verify it is not corrupted.")
+
+        # Extract facial embedding from the uploaded image
+        success, embedding, error_message = self.extract_face_embedding(file_path)
+        if not success:
+            messagebox.showerror("Error", error_message)
             return
+
+        self.reference_face_embedding = embedding
         self.image_validated = True
-        messagebox.showinfo("Success", f"Valid image: {file_test}")
+        messagebox.showinfo("Success", f"Valid image with 1 face detected: {file_path}")
         self.update_status()
 
     def validate_yt_url(self):
+        """Validate the YouTube URL by checking accessibility and extracting information."""
         yt_url = self.youtube_url.get()
         if not yt_url:
             messagebox.showerror("Error", "Please enter a YouTube link.")
