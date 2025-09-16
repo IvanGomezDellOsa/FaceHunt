@@ -9,6 +9,7 @@ from deepface import DeepFace
 import numpy as np
 import tempfile
 import shutil
+from fh_frame_extractor import VideoFrameExtractor
 
 
 class FaceHuntInputSelection:
@@ -25,6 +26,7 @@ class FaceHuntInputSelection:
         self.url_validated = False
         self.video_path = None
         self.reference_face_embedding = None
+        self.frame_extractor = None
 
         # --- Imagen ---
         tk.Label(root, text="Select an image (JPG/PNG/WebP)").pack(pady=5)
@@ -199,10 +201,41 @@ class FaceHuntInputSelection:
         self.setup_download_ui()
 
     def start_download(self):
-        """Starts the download using VideoDownloader."""
+        """Starts the download using VideoDownloader"""
         downloader = VideoDownloader(self.root, self.progress, self.youtube_url.get())
         self.video_path = downloader.download()
         if self.video_path:
             messagebox.showinfo("Success", f"Video downloaded successfully: {self.video_path}")
+            self.initialize_frame_extractor()
         else:
             messagebox.showerror("Error", "Download failed. Check previous errors.")
+
+    def initialize_frame_extractor(self):
+        """Initializes VideoFrameExtractor and sets up extraction."""
+        self.frame_extractor = VideoFrameExtractor(self.video_path)
+        success, message = self.frame_extractor.open_video()
+        if success:
+            self.setup_extraction_ui()
+        else:
+            messagebox.showerror("Error", message)
+
+    def setup_extraction_ui(self):
+        """Sets up the UI for video frame extraction process."""
+        self.clear_window()
+        self.root.title("FaceHunt - Video processor")
+
+        tk.Label(self.root, text="Select extraction mode:").pack(pady=5)
+
+        self.mode_var = tk.StringVar(value="Balanced")
+        modes = ["High Precision", "Balanced"]
+        self.mode_selector = ttk.Combobox(self.root, textvariable=self.mode_var, values=modes, state="readonly")
+        self.mode_selector.pack(pady=5)
+
+        tk.Button(self.root, text="Start Extraction", command=self.start_extraction).pack(pady=10)
+
+    def start_extraction(self):
+        """Start frame extraction with selected mode."""
+        mode = self.mode_var.get()
+        interval = self.frame_extractor.determine_interval(mode)
+        messagebox.showinfo("Extraction Mode", f"Mode: {mode}\nFrame interval: {interval}")
+
