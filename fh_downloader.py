@@ -12,7 +12,7 @@ class VideoDownloader:
         self.output_dir = "videos"
 
     def download(self):
-        """Downloads the video in MP4/720p with multiple download control."""
+        """Downloads the video in MP4/480p with multiple download control."""
         try:
             os.makedirs(self.output_dir, exist_ok=True)
 

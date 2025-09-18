@@ -63,8 +63,8 @@ class VideoFrameExtractor:
 
             if frame_index % self.frame_interval == 0:
                 try:
-                    facenet_frame  = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #BGR → RGB
-                    facenet_frame  = cv2.resize(facenet_frame , (160, 160)) #Size (160x160)
+                    facenet_frame  = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) # BGR -> RGB
+                    facenet_frame  = cv2.resize(facenet_frame , (160, 160)) # Size (160x160)
                     facenet_frame  = facenet_frame .astype("float32") / 255.0
                     frames.append(facenet_frame)
 

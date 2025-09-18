@@ -235,17 +235,18 @@ class FaceHuntInputSelection:
         self.extract_button.pack(pady=10)
 
         self.progress_frame = tk.Frame(self.root)
+
         self.progress_frame.pack(pady=20)
+        progress_label = tk.Label(self.progress_frame, text="Extraction Progress:", font=("Arial", 10, "bold"))
+        progress_label.pack(pady=2)
 
-        tk.Label(self.progress_frame, text="Extraction Progress:", font=("Arial", 10, "bold"))
-
-        self.step1_label = tk.Label(text="⚪ Determine frame interval", font=("Arial", 9))
+        self.step1_label = tk.Label(self.progress_frame, text="⚪ Determine frame interval", font=("Arial", 9))
         self.step1_label.pack(pady=2, anchor="center")
 
-        self.step2_label = tk.Label(text="⚪ Extract frames", font=("Arial", 9))
+        self.step2_label = tk.Label(self.progress_frame, text="⚪ Extract frames", font=("Arial", 9))
         self.step2_label.pack(pady=2, anchor="center")
 
-        self.step3_label = tk.Label(text="⚪ Process for FaceNet", font=("Arial", 9))
+        self.step3_label = tk.Label(self.progress_frame, text="⚪ Process for FaceNet", font=("Arial", 9))
         self.step3_label.pack(pady=2, anchor="center") #Vincular cuando haga el paso 3
 
     def start_extraction(self):
