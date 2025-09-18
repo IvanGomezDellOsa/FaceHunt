@@ -32,16 +32,16 @@ class VideoFrameExtractor:
 
         if mode == "High Precision":
             seconds_per_sample = 0.25 # 1 frame every 0.25s
-        else: # Mode = balanced
+        else: # Mode = Balanced
             seconds_per_sample = 0.5 # 1 frame every 0.5s
 
         self.frame_interval = int(fps * seconds_per_sample)
         return self.frame_interval
+
+    def extract_frames(self, ):
 
     def release_video(self):
         """Release the video capture resource."""
         if self.video_capture is not None:
             self.video_capture.release()
             self.video_capture = None
-
-

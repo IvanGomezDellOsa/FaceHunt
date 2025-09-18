@@ -42,7 +42,7 @@ class VideoDownloader:
 
             # Download options
             ydl_opts = {
-                'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best', # DeepFace works well with 480p
                 'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
                 'progress_hooks': [self.progress_hook],
                 'noplaylist': True,
