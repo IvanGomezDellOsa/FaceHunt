@@ -231,11 +231,42 @@ class FaceHuntInputSelection:
         self.mode_selector = ttk.Combobox(self.root, textvariable=self.mode_var, values=modes, state="readonly")
         self.mode_selector.pack(pady=5)
 
-        tk.Button(self.root, text="Start Extraction", command=self.start_extraction).pack(pady=10)
+        self.extract_button = tk.Button(self.root, text="Start Extraction", command=self.start_extraction)
+        self.extract_button.pack(pady=10)
+
+        self.progress_frame = tk.Frame(self.root)
+        self.progress_frame.pack(pady=20)
+
+        tk.Label(self.progress_frame, text="Extraction Progress:", font=("Arial", 10, "bold"))
+
+        self.step1_label = tk.Label(text="⚪ Determine frame interval", font=("Arial", 9))
+        self.step1_label.pack(pady=2, anchor="center")
+
+        self.step2_label = tk.Label(text="⚪ Extract frames", font=("Arial", 9))
+        self.step2_label.pack(pady=2, anchor="center")
+
+        self.step3_label = tk.Label(text="⚪ Process for FaceNet", font=("Arial", 9))
+        self.step3_label.pack(pady=2, anchor="center") #Vincular cuando haga el paso 3
 
     def start_extraction(self):
         """Start frame extraction with selected mode."""
+        self.extract_button.config(state="disabled")
+
         mode = self.mode_var.get()
-        interval = self.frame_extractor.determine_interval(mode)
-        messagebox.showinfo("Extraction Mode", f"Mode: {mode}\nFrame interval: {interval}")
+
+        success_interval = self.frame_extractor.determine_interval(mode)
+        if success_interval:
+            self.step1_label.config(text="✅ Determine frame interval", fg="green")
+            self.root.update()
+        else:
+            messagebox.showerror("Error", "Failed to determine frame interval")
+            return
+
+        success, result = self.frame_extractor.process_video()
+        if success:
+            self.step2_label.config(text="✅ Extract frames", fg="green")
+            self.root.update()
+            print(f"Success: Extracted {len(result)} frames for FaceNet")
+        else:
+            messagebox.showerror("Error", result)
 

@@ -3,10 +3,10 @@ from deepface import DeepFace
 import os
 
 class VideoFrameExtractor:
-    def __init__(self, video_path, reference_face_embedding):
+    def __init__(self, video_path):
         self.video_path = video_path
         self.video_capture = None
-        self.reference_face_embedding = reference_face_embedding
+
         self.frame_interval = None
 
     def open_video(self):
@@ -38,7 +38,58 @@ class VideoFrameExtractor:
         self.frame_interval = int(fps * seconds_per_sample)
         return self.frame_interval
 
-    def extract_frames(self, ):
+    def extract_frames(self):
+        """
+         Extract and preprocess frames specifically for FaceNet model.
+         Preprocessing steps:
+            - Extract frames at self.frame_interval
+            - Convert BGR → RGB
+            - Resize to 160x160 (FaceNet input requirement)
+            - Normalize pixel values to [0,1] range (MachineLearning format)
+        """
+        if self.video_capture is None or self.frame_interval is None:
+            return False, "Video or frame interval not properly initialized"
+
+        frames = []
+        frame_index = 0
+
+        print ("Extracting frames for FaceNet...")
+
+        while True:
+            ret, frame = self.video_capture.read()
+
+            if not ret or frame is None:
+                break
+
+            if frame_index % self.frame_interval == 0:
+                try:
+                    facenet_frame  = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #BGR → RGB
+                    facenet_frame  = cv2.resize(facenet_frame , (160, 160)) #Size (160x160)
+                    facenet_frame  = facenet_frame .astype("float32") / 255.0
+                    frames.append(facenet_frame)
+
+                    if len(frames) % 25 == 0:
+                        print(f"Progress: {len(frames)} frames processed")
+                except Exception as e:
+                    print (f"Error processing frame {frame_index}: {e}")
+
+            frame_index += 1
+
+        if not frames:
+            return False, "Error: No frames extracted."
+
+        print(f"Successfully extracted {len(frames)} frames")
+        return True, frames
+
+    def process_video(self):
+        """Main processing method with proper resource management."""
+        try:
+            return self.extract_frames()
+        except Exception as e:
+            return False, f"Unexpected error during processing: {str(e)}"
+        finally:
+            self.release_video()
+
 
     def release_video(self):
         """Release the video capture resource."""
