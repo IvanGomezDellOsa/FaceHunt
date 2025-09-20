@@ -264,10 +264,20 @@ class FaceHuntInputSelection:
             return
 
         success, result = self.frame_extractor.process_video()
+
+        gen = result
+        any_frame = False
+        try:
+            for batch in gen:
+                any_frame = True
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Extraction failed: {str(e)}")
+            return
+
         if success:
             self.step2_label.config(text="✅ Extract frames", fg="green")
-            self.root.update()
-            print(f"Success: Extracted {len(result)} frames for FaceNet")
+            messagebox.showinfo("Success", "Frames extracted successfully!")
         else:
             messagebox.showerror("Error", result)
-
+            return

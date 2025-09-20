@@ -38,58 +38,92 @@ class VideoFrameExtractor:
         self.frame_interval = int(fps * seconds_per_sample)
         return self.frame_interval
 
-    def extract_frames(self):
+    def _is_large_video(self):
+        """Check if video is considered large (>100MB or >30min)."""
+        try:
+            if os.path.getsize(self.video_path) > 100 * 1024 * 1024:  # 100MB
+                return True
+
+            fps = self.video_capture.get(cv2.CAP_PROP_FPS) or 30
+            total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+            if total_frames <= 0:
+                return False
+
+            duration_minutes = total_frames / fps / 60
+            return duration_minutes > 30
+        except Exception:
+            return False
+
+
+    def _process_frame(self, frame):
         """
-         Extract and preprocess frames specifically for FaceNet model.
-         Preprocessing steps:
+        Preprocessing steps:
             - Extract frames at self.frame_interval
             - Convert BGR → RGB
             - Resize to 160x160 (FaceNet input requirement)
             - Normalize pixel values to [0,1] range (MachineLearning format)
         """
+        facenet_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR -> RGB
+        facenet_frame = cv2.resize(facenet_frame, (160, 160))  # Size (160x160)
+        return facenet_frame.astype("float32") / 255.0
+
+    def extract_frames(self):
+        """
+         Automatically chooses processing mode based on video size:
+            - Normal mode: Returns single batch (videos <30min or <100MB)
+            - Batch mode: Yields multiple batches of 100 frames (large videos)
+         Extract and preprocess frames specifically for FaceNet model.
+         Preprocessing steps
+        """
         if self.video_capture is None or self.frame_interval is None:
-            return False, "Video or frame interval not properly initialized"
+            raise RuntimeError("Video or frame interval not initialized")
+        try:
+            use_batch = self._is_large_video()
+            if use_batch:
+                batch_size = 100
+                print("Extracting frames for FaceNet in batch mode")
+            else:
+                print("Extracting frames for FaceNet in normal mode")
 
-        frames = []
-        frame_index = 0
+            buffer =[]
+            processed_count = 0
+            frame_index = 0
 
-        print ("Extracting frames for FaceNet...")
+            while True:
+                ret, frame = self.video_capture.read()
+                if not ret:
+                    break
 
-        while True:
-            ret, frame = self.video_capture.read()
+                if frame_index % self.frame_interval == 0:
+                    processed_frame = self._process_frame(frame)
+                    buffer.append(processed_frame)
+                    processed_count += 1
 
-            if not ret or frame is None:
-                break
+                    if use_batch and len(buffer) >= batch_size:
+                        yield buffer
+                        buffer = []
 
-            if frame_index % self.frame_interval == 0:
-                try:
-                    facenet_frame  = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) # BGR -> RGB
-                    facenet_frame  = cv2.resize(facenet_frame , (160, 160)) # Size (160x160)
-                    facenet_frame  = facenet_frame .astype("float32") / 255.0
-                    frames.append(facenet_frame)
+                    if processed_count % 100 == 0:
+                        print(f"Progress: {processed_count} frames processed")
 
-                    if len(frames) % 25 == 0:
-                        print(f"Progress: {len(frames)} frames processed")
-                except Exception as e:
-                    print (f"Error processing frame {frame_index}: {e}")
+                frame_index += 1
+            if buffer:
+                yield buffer
 
-            frame_index += 1
+            if processed_count == 0:
+                raise RuntimeError("No frames extracted")
 
-        if not frames:
-            return False, "Error: No frames extracted."
-
-        print(f"Successfully extracted {len(frames)} frames")
-        return True, frames
+        finally:
+            self.release_video()
 
     def process_video(self):
         """Main processing method with proper resource management."""
         try:
-            return self.extract_frames()
+            gen = self.extract_frames()
+            return True, gen
         except Exception as e:
-            return False, f"Unexpected error during processing: {str(e)}"
-        finally:
             self.release_video()
-
+            return False, f"Error starting extraction: {str(e)}"
 
     def release_video(self):
         """Release the video capture resource."""
