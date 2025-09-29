@@ -1,6 +1,7 @@
 import os
 import shutil
 import yt_dlp
+from unidecode import unidecode
 from tkinter import messagebox
 
 
@@ -11,6 +12,22 @@ class VideoDownloader:
         self.youtube_url = youtube_url
         self.output_dir = "videos"
 
+    def sanitize_filename(self, title):
+        """Convert video title to safe ASCII filename."""
+        ascii_title = unidecode(title)
+
+        prohibited = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '@', '#', '%']
+        for char in prohibited:
+            ascii_title = ascii_title.replace(char, '_')
+
+        ascii_title = ' '.join(ascii_title.split())
+        ascii_title = ascii_title[:100]
+
+        if not ascii_title or ascii_title.isspace():
+            ascii_title = "video_download"
+
+        return ascii_title
+
     def download(self):
         """Downloads the video in MP4/480p with multiple download control."""
         try:
@@ -19,7 +36,8 @@ class VideoDownloader:
             with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
                 info = ydl.extract_info(self.youtube_url, download=False)
                 video_title = info['title']
-                video_file = f"{self.output_dir}/{video_title}.mp4"
+                clean_title = self.sanitize_filename(video_title)
+                video_file = f"{self.output_dir}/{clean_title}.mp4"
 
             estimated_size = info.get('filesize_approx', 0)
             if not estimated_size:
@@ -40,7 +58,7 @@ class VideoDownloader:
             # Download options
             ydl_opts = {
                 'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best', # DeepFace works well with 480p
-                'outtmpl': f'{self.output_dir}/%(title)s.%(ext)s',
+                'outtmpl': f'{self.output_dir}/{clean_title}.%(ext)s',
                 'progress_hooks': [self.progress_hook],
                 'noplaylist': True,
                 'quiet': True

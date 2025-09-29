@@ -54,7 +54,6 @@ class VideoFrameExtractor:
         except Exception:
             return False
 
-
     def _process_frame(self, frame):
         """
         Preprocessing steps:
