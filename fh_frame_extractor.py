@@ -1,13 +1,12 @@
 import cv2
-from deepface import DeepFace
 import os
 
 class VideoFrameExtractor:
     def __init__(self, video_path):
         self.video_path = video_path
         self.video_capture = None
-
         self.frame_interval = None
+        self.fps = None
 
     def open_video(self):
         """Open the video using cv2.VideoCapture and return the capture or error details."""
@@ -17,9 +16,13 @@ class VideoFrameExtractor:
 
             self.video_capture = cv2.VideoCapture(self.video_path)
             if self.video_capture.isOpened():
-                return True, None
-            else:
                 return False, "The downloaded video is not valid"
+
+            self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
+            if not self.fps or self.fps <= 0:
+                self.fps = 30
+            return True, None
+
         except Exception as e:
             print(f"Error opening video: {e}")
             return False, str(e)
@@ -44,12 +47,11 @@ class VideoFrameExtractor:
             if os.path.getsize(self.video_path) > 100 * 1024 * 1024:  # 100MB
                 return True
 
-            fps = self.video_capture.get(cv2.CAP_PROP_FPS) or 30
             total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if total_frames <= 0:
                 return False
 
-            duration_minutes = total_frames / fps / 60
+            duration_minutes = total_frames / self.fps / 60
             return duration_minutes > 30
         except Exception:
             return False
