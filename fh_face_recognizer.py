@@ -8,7 +8,7 @@ class FaceRecognizer:
         self.reference_embedding = np.array(reference_embedding)
         self.model_name = 'Facenet'
 
-    def find_matches(self, frame_generator, threshold=0.4, fps=30):
+    def find_matches(self, frame_generator, threshold=0.4, fps=30, processable_frames=0):
         """ Compare frames with reference embedding using cosine distance. (0.3-0.4 strict, 0.5-0.6 permissive) """
         matches = []
         processed = 0
@@ -48,8 +48,11 @@ class FaceRecognizer:
                     processed += 1
 
                     if processed % 100 == 0:
-                        print(f"Progress: {processed} frames, {len(matches)} matches")
-
+                        if processable_frames > 0:
+                            print(
+                                f"Progress: {processed} of {processable_frames} total processable frames | Matches found: {len(matches)}")
+                        else:
+                            print(f"Progress: {processed} frames | Matches found: {len(matches)}")
 
                 except Exception as e:
                     if skipped == 0:

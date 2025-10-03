@@ -7,6 +7,8 @@ class VideoFrameExtractor:
         self.video_capture = None
         self.frame_interval = None
         self.fps = None
+        self.total_frames = 0
+        self.total_processable_frames = 0
 
     def open_video(self):
         """Open the video using cv2.VideoCapture and return the capture or error details."""
@@ -19,8 +21,22 @@ class VideoFrameExtractor:
                 return False, "The downloaded video is not valid"
 
             self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
+            self.total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+
             if not self.fps or self.fps <= 0:
                 self.fps = 30
+
+            temp_capture = cv2.VideoCapture(self.video_path)
+            temp_frame_count = 0
+            while temp_capture.isOpened():
+                ret, frame = temp_capture.read()
+                if not ret:
+                    break
+                temp_frame_count += 1
+            temp_capture.release()
+
+            self.total_frames = temp_frame_count
+            print(f"Total frames: {self.total_frames}")
             return True, None
 
         except Exception as e:
@@ -39,6 +55,7 @@ class VideoFrameExtractor:
             seconds_per_sample = 0.5 # 1 frame every 0.5s
 
         self.frame_interval = int(fps * seconds_per_sample)
+
         return self.frame_interval
 
     def _is_large_video(self):
@@ -47,26 +64,13 @@ class VideoFrameExtractor:
             if os.path.getsize(self.video_path) > 100 * 1024 * 1024:  # 100MB
                 return True
 
-            total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
-            if total_frames <= 0:
+            if self.total_frames <= 0:
                 return False
 
-            duration_minutes = total_frames / self.fps / 60
+            duration_minutes = self.total_frames / self.fps / 60
             return duration_minutes > 30
         except Exception:
             return False
-
-    def _process_frame(self, frame):
-        """
-        Preprocessing steps:
-            - Extract frames at self.frame_interval
-            - Convert BGR → RGB
-            - Resize to 160x160 (FaceNet input requirement)
-            - Normalize pixel values to [0,1] range (MachineLearning format)
-        """
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR -> RGB
-        #facenet_frame = cv2.resize(facenet_frame, (160, 160))  # Size (160x160)
-        #return facenet_frame.astype("float32") / 255.0
 
     def extract_frames(self):
         """
@@ -82,9 +86,9 @@ class VideoFrameExtractor:
             use_batch = self._is_large_video()
             if use_batch:
                 batch_size = 100
-                print("Extracting frames for FaceNet in batch mode")
+                print("Extracting frames for FaceNet in batch mode...")
             else:
-                print("Extracting frames for FaceNet in normal mode")
+                print("Extracting frames for FaceNet in normal mode...")
 
             buffer =[]
             processed_count = 0
@@ -96,16 +100,15 @@ class VideoFrameExtractor:
                     break
 
                 if frame_index % self.frame_interval == 0:
-                    processed_frame = self._process_frame(frame)
+                    processed_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     buffer.append((processed_frame, frame_index))
                     processed_count += 1
 
                     if use_batch and len(buffer) >= batch_size:
                         yield buffer
                         buffer = []
-
-                    if processed_count % 100 == 0:
-                        print(f"Progress: {processed_count} frames processed")
+                if processed_count % 200 == 0:
+                    print(f"Extracting frames...")
 
                 frame_index += 1
             if buffer:
@@ -121,6 +124,7 @@ class VideoFrameExtractor:
         """Main processing method with proper resource management."""
         try:
             gen = self.extract_frames()
+            self.total_processable_frames = (self.total_frames // self.frame_interval)
             return True, gen
         except Exception as e:
             self.release_video()

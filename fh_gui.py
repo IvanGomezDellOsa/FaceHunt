@@ -237,6 +237,9 @@ class FaceHuntInputSelection:
         self.recognize_button = tk.Button(self.root, text="Start Recognition", command=self.start_extraction)
         self.recognize_button.pack(pady=15)
 
+        self.progress_frame = tk.Frame(self.root)
+        self.progress_frame.pack(pady=20)
+
         self.step1_label = tk.Label(self.progress_frame, text="⚪ Determine frame interval", font=("Arial", 9))
         self.step1_label.pack(pady=2, anchor="center")
 
@@ -281,7 +284,8 @@ class FaceHuntInputSelection:
             matches = recognizer.find_matches(
                 self.frame_generator,
                 threshold=0.4,
-                fps=self.frame_extractor.fps
+                fps=self.frame_extractor.fps,
+                processable_frames = self.frame_extractor.total_processable_frames
             )
         except Exception as e:
             messagebox.showerror("Error", f"Processing failed: {e}")
