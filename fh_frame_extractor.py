@@ -15,7 +15,7 @@ class VideoFrameExtractor:
                 return None, "Video file not found"
 
             self.video_capture = cv2.VideoCapture(self.video_path)
-            if self.video_capture.isOpened():
+            if not self.video_capture.isOpened():
                 return False, "The downloaded video is not valid"
 
             self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
@@ -64,9 +64,9 @@ class VideoFrameExtractor:
             - Resize to 160x160 (FaceNet input requirement)
             - Normalize pixel values to [0,1] range (MachineLearning format)
         """
-        facenet_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR -> RGB
-        facenet_frame = cv2.resize(facenet_frame, (160, 160))  # Size (160x160)
-        return facenet_frame.astype("float32") / 255.0
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR -> RGB
+        #facenet_frame = cv2.resize(facenet_frame, (160, 160))  # Size (160x160)
+        #return facenet_frame.astype("float32") / 255.0
 
     def extract_frames(self):
         """
@@ -97,7 +97,7 @@ class VideoFrameExtractor:
 
                 if frame_index % self.frame_interval == 0:
                     processed_frame = self._process_frame(frame)
-                    buffer.append(processed_frame)
+                    buffer.append((processed_frame, frame_index))
                     processed_count += 1
 
                     if use_batch and len(buffer) >= batch_size:

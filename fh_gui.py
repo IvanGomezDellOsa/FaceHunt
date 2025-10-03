@@ -10,6 +10,7 @@ import numpy as np
 import tempfile
 import shutil
 from fh_frame_extractor import VideoFrameExtractor
+from fh_face_recognizer import FaceRecognizer
 
 
 class FaceHuntInputSelection:
@@ -27,6 +28,8 @@ class FaceHuntInputSelection:
         self.video_path = None
         self.reference_face_embedding = None
         self.frame_extractor = None
+        self.frame_generator = None
+        self.recognize_button = None
 
         # --- Imagen ---
         tk.Label(root, text="Select an image (JPG/PNG/WebP)").pack(pady=5)
@@ -231,14 +234,8 @@ class FaceHuntInputSelection:
         self.mode_selector = ttk.Combobox(self.root, textvariable=self.mode_var, values=modes, state="readonly")
         self.mode_selector.pack(pady=5)
 
-        self.extract_button = tk.Button(self.root, text="Start Extraction", command=self.start_extraction)
-        self.extract_button.pack(pady=10)
-
-        self.progress_frame = tk.Frame(self.root)
-
-        self.progress_frame.pack(pady=20)
-        progress_label = tk.Label(self.progress_frame, text="Extraction Progress:", font=("Arial", 10, "bold"))
-        progress_label.pack(pady=2)
+        self.recognize_button = tk.Button(self.root, text="Start Recognition", command=self.start_extraction)
+        self.recognize_button.pack(pady=15)
 
         self.step1_label = tk.Label(self.progress_frame, text="⚪ Determine frame interval", font=("Arial", 9))
         self.step1_label.pack(pady=2, anchor="center")
@@ -246,12 +243,12 @@ class FaceHuntInputSelection:
         self.step2_label = tk.Label(self.progress_frame, text="⚪ Extract frames", font=("Arial", 9))
         self.step2_label.pack(pady=2, anchor="center")
 
-        self.step3_label = tk.Label(self.progress_frame, text="⚪ Process for FaceNet", font=("Arial", 9))
-        self.step3_label.pack(pady=2, anchor="center") #Vincular cuando haga el paso 3
+        self.step3_label = tk.Label(self.progress_frame, text="⚪ Find matches", font=("Arial", 9))
+        self.step3_label.pack(pady=2, anchor="center")
 
     def start_extraction(self):
         """Start frame extraction with selected mode."""
-        self.extract_button.config(state="disabled")
+        self.recognize_button.config(state="disabled")
 
         mode = self.mode_var.get()
 
@@ -265,19 +262,40 @@ class FaceHuntInputSelection:
 
         success, result = self.frame_extractor.process_video()
 
-        gen = result
-        any_frame = False
-        try:
-            for batch in gen:
-                any_frame = True
-
-        except Exception as e:
-            messagebox.showerror("Error", f"Extraction failed: {str(e)}")
-            return
+        self.frame_generator = result
 
         if success:
             self.step2_label.config(text="✅ Extract frames", fg="green")
-            messagebox.showinfo("Success", "Frames extracted successfully!")
+            self.start_recognition()
         else:
             messagebox.showerror("Error", result)
             return
+
+    def start_recognition(self):
+        """Run face recognition using extracted frames."""
+        self.step3_label.config(text="🔵 Find matches", fg="orange")
+        self.root.update()
+
+        try:
+            recognizer = FaceRecognizer(self.reference_face_embedding)
+            matches = recognizer.find_matches(
+                self.frame_generator,
+                threshold=0.4,
+                fps=self.frame_extractor.fps
+            )
+        except Exception as e:
+            messagebox.showerror("Error", f"Processing failed: {e}")
+            return
+
+        if not matches:
+            messagebox.showinfo("Result", "No matches found.")
+        else:
+            result_message = f"Recognition complete\nFound {len(matches)} matches:\n"
+            match_lines = [
+                f"- Match at frame {match['frame_index']} ({match['timestamp']})"
+                for match in matches
+            ]
+            result_message += "\n".join(match_lines)
+            messagebox.showinfo("Result", result_message)
+
+        self.step3_label.config(text="✅ Find matches", fg="green")

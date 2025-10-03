@@ -6,22 +6,23 @@ class FaceRecognizer:
     """Recognizes faces in video frames using FaceNet model via DeepFace."""
     def __init__(self, reference_embedding):
         self.reference_embedding = np.array(reference_embedding)
-        self.model_name = 'FaceNet'
+        self.model_name = 'Facenet'
 
     def find_matches(self, frame_generator, threshold=0.4, fps=30):
         """ Compare frames with reference embedding using cosine distance. (0.3-0.4 strict, 0.5-0.6 permissive) """
         matches = []
-        frame_idx = 0
         processed = 0
         skipped = 0
 
         print("Starting face recognition...")
         print(f"Using threshold: {threshold} (cosine distance)")
-
         for batch in frame_generator:
-            for frame in batch:
+            for frame, frame_idx in batch:
                 try:
                     result = DeepFace.represent(frame, model_name = self.model_name, enforce_detection = False)
+
+                    if isinstance(result, dict):
+                        result = [result]
 
                     frame_has_match = False
 
@@ -34,6 +35,7 @@ class FaceRecognizer:
                             break
 
                     if frame_has_match:
+                        timestamp_seconds = frame_idx / fps
                         minutes = int(timestamp_seconds // 60)
                         seconds = int(timestamp_seconds % 60)
 
@@ -48,21 +50,17 @@ class FaceRecognizer:
                     if processed % 100 == 0:
                         print(f"Progress: {processed} frames, {len(matches)} matches")
 
-                except Exception as e:
-                    skipped += 1
-                    if skipped % 50 == 0:
-                        print(f"Warning: {skipped} frames skipped")
 
-                frame_idx += 1
+                except Exception as e:
+                    if skipped == 0:
+                        print(f"--> {e}")
+
+                    skipped += 1
 
         print("=" * 60)
         print(f"Recognition complete: {len(matches)} matches")
+        for match in matches:
+            print(f"Match at frame {match['frame_index']} ({match['timestamp']})")
         print("=" * 60)
 
         return matches
-
-
-
-
-
-
