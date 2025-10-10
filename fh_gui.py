@@ -16,19 +16,20 @@ from fh_face_recognizer import FaceRecognizer
 class FaceHuntInputSelection:
     def __init__(self, root):
         self.root = root
-        self.root.title("FaceHunt - Image and YouTube Link Selection")
-        self.root.geometry("800x400")
+        self.root.title("FaceHunt - Input Selection")
+        self.root.geometry("800x450")
 
         self.image_path = tk.StringVar(value="")
-        self.youtube_url = tk.StringVar(value="")
-        self.youtube_url.trace("w", lambda *args: setattr(self, "url_validated",
-                                                          False))  # Reset URL validation when value changes
+        self.video_source = tk.StringVar(value="")
+        self.video_source.trace("w", self.reset_video_validation)
+
         self.image_validated = False
-        self.url_validated = False
+        self.source_validated = False
         self.video_path = None
         self.reference_face_embedding = None
         self.frame_extractor = None
         self.frame_generator = None
+        self.youtube_url_to_download = None
         self.recognize_button = None
 
         # --- Imagen ---
@@ -39,14 +40,16 @@ class FaceHuntInputSelection:
         self.image_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
         self.image_status.pack(pady=2)
 
-        # --- YouTube ---
-        tk.Label(root, text="Enter YouTube link:").pack(pady=5)
-        tk.Entry(root, textvariable=self.youtube_url, width=50).pack(pady=5)
-        tk.Button(root, text="Validate YouTube URL", command=self.validate_yt_url).pack(pady=10)
-        self.url_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
-        self.url_status.pack(pady=2)
+        # --- Video Source ---
+        tk.Label(root, text="Enter YouTube URL or select a local file: ").pack(pady=20)
+        tk.Entry(root, textvariable=self.video_source, width=50).pack(pady=5)
+        tk.Button(root, text="Browse Local Video", command=self.select_local_video).pack(pady=5)
 
-        tk.Button(root, text="Next Step", command=self.next_step).pack(pady=10)
+        tk.Button(root, text="Validate Video Source", command=self.validate_video_source).pack(pady=10)
+        self.video_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
+        self.video_status.pack(pady=2)
+
+        tk.Button(root, text="Next Step", command=self.proceed_to_next_step).pack(pady=10)
 
     def select_image(self):
         """Open file dialog to select an image file."""
@@ -56,7 +59,8 @@ class FaceHuntInputSelection:
             self.image_validated = False
             self.update_status()
 
-    def _create_temp_image_copy(self, file_path):
+    @staticmethod
+    def _create_temp_image_copy(file_path):
         """
             Create a temporary copy of the image with a safe name (ASCII).
             Return the temporary path.
@@ -68,7 +72,7 @@ class FaceHuntInputSelection:
         return temp_path
 
     def extract_face_embedding(self, file_path):
-        '''
+        """
             Extract the facial embedding from the image using DeepFace with Facenet.
             1. Verify that the image can be opened and decoded from bytes
             2. Create a temporary copy of the image with a safe ASCII name
@@ -76,7 +80,7 @@ class FaceHuntInputSelection:
             3. Use DeepFace.represent() to compute the facial embedding.
             4. Validate that exactly one face is detected in the image.
             Returns: tuple: (success: bool, embedding: list or None, error_message: str or None)
-        '''
+        """
         temp_path = None
         try:
             with open(file_path, 'rb') as f:
@@ -152,22 +156,71 @@ class FaceHuntInputSelection:
         messagebox.showinfo("Success", f"Valid image with 1 face detected: {file_path}")
         self.update_status()
 
-    def validate_yt_url(self):
-        """Validate the YouTube URL by checking accessibility and extracting information."""
-        yt_url = self.youtube_url.get()
-        if not yt_url:
-            messagebox.showerror("Error", "Please enter a YouTube link.")
-            return
+    def select_local_video(self):
+        """Open a dialog to select a local video file."""
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Video files", "*.mp4 *.avi *.mov *.mkv *.webm"), ("All files", "*.*")]
+        )
+        if file_path:
+            self.video_source.set(file_path)
+            self.video_path = file_path
+            self.source_validated = False
+            self.video_status.config(text="✗", fg="red")
+
+    def reset_video_validation(self, *args):
+        """Reset the validation status of the video when the text changes."""
+        if self.source_validated:
+            self.video_status.config(text="✗", fg="red")
+            self.source_validated = False
+
+    def validate_video_source(self):
+        """Verify that the video source (local or YouTube) is real and accessible."""
         try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
-                info = ydl.extract_info(yt_url, download=False)
-            self.url_validated = True
-            messagebox.showinfo("Success", f"Valid YouTube video: {info['title']}")
-        except Exception as e:
-            self.url_validated = False
-            messagebox.showerror("Error", f"Invalid YouTube link or video not accessible.\nDetails: {e}")
+            source = self.video_source.get().strip()
+            if not source:
+                messagebox.showerror("Error", "Video source cannot be empty.")
+                return
+
+            if os.path.exists(source):
+                cap = cv2.VideoCapture(source)
+                if cap.isOpened():
+                    cap.release()
+                    self.source_validated = True
+                    messagebox.showinfo("Success", "Valid local video file.")
+                else:
+                    messagebox.showerror("Error", "Invalid or unsupported video format.")
+                    self.source_validated = False
+                return
+            try:
+                with yt_dlp.YoutubeDL({'quiet': True, 'noplaylist': True}) as ydl:
+                    info = ydl.extract_info(source, download=False)
+                self.source_validated = True
+                messagebox.showinfo("Success", f"Valid YouTube URL:\n{info.get('title', 'Unknown')}")
+
+            except yt_dlp.utils.DownloadError:
+                messagebox.showerror("Error", "The path is not a valid local file or a YouTube URL.")
+                self.source_validated = False
+            except Exception as e:
+                messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+                self.source_validated = False
+        finally:
+            self.update_status()
+
+    def proceed_to_next_step(self):
+        """"""
+        if not self.image_validated or not self.source_validated:
+            messagebox.showerror("Error","Please validate both the image and the video source")
             return
-        self.update_status()
+
+        source = self.video_source.get().strip()
+
+        if os.path.exists(source):
+            self.video_path = source
+            self.initialize_frame_extractor()
+        else:
+            self.youtube_url_to_download = source
+            self.clear_window()
+            self.setup_download_ui()
 
     def update_status(self):
         """Update the status labels with (✓) or (✗) and colors."""
@@ -176,10 +229,10 @@ class FaceHuntInputSelection:
         else:
             self.image_status.config(text="✗", fg="red")
 
-        if self.url_validated:
-            self.url_status.config(text="✓", fg="green")
+        if self.source_validated:
+            self.video_status.config(text="✓", fg="green")
         else:
-            self.url_status.config(text="✗", fg="red")
+            self.video_status.config(text="✗", fg="red")
 
     def clear_window(self):
         """Destroys all widgets in the main window."""
@@ -195,17 +248,9 @@ class FaceHuntInputSelection:
         self.progress_bar = ttk.Progressbar(self.root, variable=self.progress, maximum=100)
         self.progress_bar.pack(pady=5, fill="x", padx=10)
 
-    def next_step(self):
-        """Validates image and URL, clears the window, and shows the download interface."""
-        if not (self.image_validated and self.url_validated):
-            messagebox.showerror("Error", "Please validate both image and YouTube link.")
-            return
-        self.clear_window()
-        self.setup_download_ui()
-
     def start_download(self):
         """Starts the download using VideoDownloader"""
-        downloader = VideoDownloader(self.root, self.progress, self.youtube_url.get())
+        downloader = VideoDownloader(self.root, self.progress, self.youtube_url_to_download)
         self.video_path = downloader.download()
         if self.video_path:
             messagebox.showinfo("Success", f"Video downloaded successfully: {self.video_path}")
