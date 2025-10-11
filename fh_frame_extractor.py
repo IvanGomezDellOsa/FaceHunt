@@ -21,18 +21,21 @@ class VideoFrameExtractor:
                 return False, "The downloaded video is not valid"
 
             self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
-
             if not self.fps or self.fps <= 0:
                 self.fps = 30
 
-            self.total_frames = 0
-            temp_capture = cv2.VideoCapture(self.video_path)
-            while temp_capture.isOpened():
-                ret, frame = temp_capture.read()
-                if not ret:
-                    break
-                self.total_frames += 1
-            temp_capture.release()
+            self.total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            if self.total_frames <= 0:
+                print("CAP_PROP_FRAME_COUNT failed, counting frames manually")
+                temp_capture = cv2.VideoCapture(self.video_path)
+                self.total_frames = 0
+                while temp_capture.isOpened():
+                    ret, frame = temp_capture.read()
+                    if not ret:
+                        break
+                    self.total_frames += 1
+                temp_capture.release()
 
             print(f"Total frames: {self.total_frames}")
             return True, None
