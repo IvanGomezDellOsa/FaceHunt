@@ -130,31 +130,33 @@ class FaceHuntInputSelection:
         - Sets self.image_validated = True.
         - Updates the GUI status and shows a success message.
         """
-        self.image_validated = False
-        file_path = self.image_path.get()
+        try:
+            self.image_validated = False
+            file_path = self.image_path.get()
 
-        if not file_path:
-            messagebox.showerror("Error", "Please select an image file.")
-            return
+            if not file_path:
+                messagebox.showerror("Error", "Please select an image file.")
+                return
 
-        if not os.path.exists(file_path):
-            messagebox.showerror("Error", "The image does not exist.")
-            return
+            if not os.path.exists(file_path):
+                messagebox.showerror("Error", "The image does not exist.")
+                return
 
-        if not file_path.lower().endswith(('.jpg', '.png', '.webp')):
-            messagebox.showerror("Error", "Only JPG, PNG, or WebP files are accepted.")
-            return
+            if not file_path.lower().endswith(('.jpg', '.png', '.webp')):
+                messagebox.showerror("Error", "Only JPG, PNG, or WebP files are accepted.")
+                return
 
-        # Extract facial embedding from the uploaded image
-        success, embedding, error_message = self.extract_face_embedding(file_path)
-        if not success:
-            messagebox.showerror("Error", error_message)
-            return
+            success, embedding, error_message = self.extract_face_embedding(file_path)
+            if not success:
+                messagebox.showerror("Error", error_message)
+                return
 
-        self.reference_face_embedding = embedding
-        self.image_validated = True
-        messagebox.showinfo("Success", f"Valid image with 1 face detected: {file_path}")
-        self.update_status()
+            self.reference_face_embedding = embedding
+            self.image_validated = True
+            messagebox.showinfo("Success", f"Valid image with 1 face detected: {file_path}")
+
+        finally:
+            self.update_status()
 
     def select_local_video(self):
         """Open a dialog to select a local video file."""
@@ -172,6 +174,7 @@ class FaceHuntInputSelection:
         if self.source_validated:
             self.video_status.config(text="✗", fg="red")
             self.source_validated = False
+            self.update_status()
 
     def validate_video_source(self):
         """Verify that the video source (local or YouTube) is real and accessible."""
