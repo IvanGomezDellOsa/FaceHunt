@@ -1,16 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import ttk
-import cv2
 import os
-import yt_dlp
 from fh_downloader import VideoDownloader
-from deepface import DeepFace
-import numpy as np
-import tempfile
-import shutil
 from fh_frame_extractor import VideoFrameExtractor
 from fh_face_recognizer import FaceRecognizer
+from fh_core import FaceHuntCore
 
 
 class FaceHuntInputSelection:
@@ -18,6 +13,8 @@ class FaceHuntInputSelection:
         self.root = root
         self.root.title("FaceHunt - Input Selection")
         self.root.geometry("800x450")
+
+        self.core = FaceHuntCore()
 
         self.image_path = tk.StringVar(value="")
         self.video_source = tk.StringVar(value="")
@@ -32,7 +29,16 @@ class FaceHuntInputSelection:
         self.youtube_url_to_download = None
         self.recognize_button = None
 
-        # --- Imagen ---
+        self.progress = None
+        self.progress_bar = None
+        self.progress_frame = None
+        self.mode_var = None
+        self.mode_selector = None
+        self.step1_label = None
+        self.step2_label = None
+        self.step3_label = None
+
+        # Imagen
         tk.Label(root, text="Select an image (JPG/PNG/WebP)").pack(pady=5)
         tk.Entry(root, textvariable=self.image_path, width=40).pack(pady=10)
         tk.Button(root, text="Browse Image", command=self.select_image).pack(pady=5)
@@ -40,7 +46,7 @@ class FaceHuntInputSelection:
         self.image_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
         self.image_status.pack(pady=2)
 
-        # --- Video Source ---
+        # Video Source
         tk.Label(root, text="Enter YouTube URL or select a local file: ").pack(pady=20)
         tk.Entry(root, textvariable=self.video_source, width=50).pack(pady=5)
         tk.Button(root, text="Browse Local Video", command=self.select_local_video).pack(pady=5)
@@ -59,101 +65,22 @@ class FaceHuntInputSelection:
             self.image_validated = False
             self.update_status()
 
-    @staticmethod
-    def _create_temp_image_copy(file_path):
-        """
-            Create a temporary copy of the image with a safe name (ASCII).
-            Return the temporary path.
-        """
-        _, ext = os.path.splitext(file_path)
-        temp_fd, temp_path = tempfile.mkstemp(suffix=ext)
-        os.close(temp_fd)
-        shutil.copyfile(file_path, temp_path)
-        return temp_path
-
-    def extract_face_embedding(self, file_path):
-        """
-            Extract the facial embedding from the image using DeepFace with Facenet.
-            1. Verify that the image can be opened and decoded from bytes
-            2. Create a temporary copy of the image with a safe ASCII name
-                (required because DeepFace fail with non-ASCII paths).
-            3. Use DeepFace.represent() to compute the facial embedding.
-            4. Validate that exactly one face is detected in the image.
-            Returns: tuple: (success: bool, embedding: list or None, error_message: str or None)
-        """
-        temp_path = None
-        try:
-            with open(file_path, 'rb') as f:
-                img_bytes = f.read()
-            img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-            if img is None:
-                return False, None, "The image could not be loaded. Please verify it is not corrupted."
-
-            temp_path = self._create_temp_image_copy(file_path)
-
-            result = DeepFace.represent(
-                img_path=temp_path,
-                model_name="Facenet",
-                enforce_detection=True
-            )
-
-            if len(result) == 0:
-                return False, None, "No faces detected in the image."
-
-            if len(result) > 1:
-                return False, None, "Multiple faces detected. Please use an image with exactly one face."
-
-            embedding = result[0]["embedding"]
-            return True, embedding, None
-
-        except ValueError as e:
-            return False, None, f"Face detection failed: {str(e)}"
-        except Exception as e:
-            return False, None, f"Unexpected error during face embedding extraction: {str(e)}"
-        finally:
-            if temp_path and os.path.exists(temp_path):
-                os.remove(temp_path)
-
     def validate_image(self):
         """
-        Validates the reference image and extracts facial embedding.
-
-        Performs progressive validation:
-        1. File selection check
-        2. File existence check
-        3. Supported format check (.jpg/.png/.webp)
-        4. Delegate to extract_face_embedding() to ensure the image is readable
-            and contains exactly one face.
-
-        On success:
-        - Stores the extracted embedding in self.reference_face_embedding.
-        - Sets self.image_validated = True.
-        - Updates the GUI status and shows a success message.
+        Validates the reference image and extracts facial embedding using fh_core.
         """
         try:
             self.image_validated = False
             file_path = self.image_path.get()
 
-            if not file_path:
-                messagebox.showerror("Error", "Please select an image file.")
-                return
+            success, embedding, message = self.core.validate_image_file(file_path)
 
-            if not os.path.exists(file_path):
-                messagebox.showerror("Error", "The image does not exist.")
-                return
-
-            if not file_path.lower().endswith(('.jpg', '.png', '.webp')):
-                messagebox.showerror("Error", "Only JPG, PNG, or WebP files are accepted.")
-                return
-
-            success, embedding, error_message = self.extract_face_embedding(file_path)
-            if not success:
-                messagebox.showerror("Error", error_message)
-                return
-
-            self.reference_face_embedding = embedding
-            self.image_validated = True
-            messagebox.showinfo("Success", f"Valid image with 1 face detected: {file_path}")
+            if success:
+                self.reference_face_embedding = embedding
+                self.image_validated = True
+                messagebox.showinfo("Success", message)
+            else:
+                messagebox.showerror("Error", message)
 
         finally:
             self.update_status()
@@ -169,7 +96,7 @@ class FaceHuntInputSelection:
             self.source_validated = False
             self.video_status.config(text="✗", fg="red")
 
-    def reset_video_validation(self, *args):
+    def reset_video_validation(self, *_):
         """Reset the validation status of the video when the text changes."""
         if self.source_validated:
             self.video_status.config(text="✗", fg="red")
@@ -177,35 +104,17 @@ class FaceHuntInputSelection:
             self.update_status()
 
     def validate_video_source(self):
-        """Verify that the video source (local or YouTube) is real and accessible."""
+        """Verify that the video source (local or YouTube) is real and accessible using fh_core."""
         try:
             source = self.video_source.get().strip()
-            if not source:
-                messagebox.showerror("Error", "Video source cannot be empty.")
-                return
+            success, source_type, message = self.core.validate_video_source(source)
 
-            if os.path.exists(source):
-                cap = cv2.VideoCapture(source)
-                if cap.isOpened():
-                    cap.release()
-                    self.source_validated = True
-                    messagebox.showinfo("Success", "Valid local video file.")
-                else:
-                    messagebox.showerror("Error", "Invalid or unsupported video format.")
-                    self.source_validated = False
-                return
-            try:
-                with yt_dlp.YoutubeDL({'quiet': True, 'noplaylist': True}) as ydl:
-                    info = ydl.extract_info(source, download=False)
+            if success:
                 self.source_validated = True
-                messagebox.showinfo("Success", f"Valid YouTube URL:\n{info.get('title', 'Unknown')}")
-
-            except yt_dlp.utils.DownloadError:
-                messagebox.showerror("Error", "The path is not a valid local file or a YouTube URL.")
+                messagebox.showinfo("Success", message)
+            else:
                 self.source_validated = False
-            except Exception as e:
-                messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-                self.source_validated = False
+                messagebox.showerror("Error", message)
         finally:
             self.update_status()
 
