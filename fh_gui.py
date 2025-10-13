@@ -9,7 +9,18 @@ from fh_core import FaceHuntCore
 
 
 class FaceHuntInputSelection:
+    """
+    Main GUI for FaceHunt application.
+
+    Handles the complete workflow: image validation, video source selection,
+    optional YouTube download, frame extraction, and face recognition.
+    """
     def __init__(self, root):
+        """
+        Initialize the FaceHunt GUI.
+        Args:
+        root: Tkinter root window
+        """
         self.root = root
         self.root.title("FaceHunt - Input Selection")
         self.root.geometry("800x500")
@@ -23,6 +34,8 @@ class FaceHuntInputSelection:
 
         self.image_validated = False
         self.source_validated = False
+
+        # Video processing components
         self.video_path = None
         self.reference_face_embedding = None
         self.frame_extractor = None
@@ -30,6 +43,7 @@ class FaceHuntInputSelection:
         self.youtube_url_to_download = None
         self.recognize_button = None
 
+        # UI components
         self.progress = None
         self.progress_bar = None
         self.progress_container = None
@@ -59,7 +73,7 @@ class FaceHuntInputSelection:
         tk.Button(root, text="Next Step", command=self.proceed_to_next_step).pack(pady=10)
 
     def select_image(self):
-        """Open file dialog to select an image file."""
+        """Open file dialog to select a reference image."""
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.webp")])
         if file_path:
             self.image_path.set(file_path)
@@ -67,9 +81,7 @@ class FaceHuntInputSelection:
             self.update_status()
 
     def validate_image(self):
-        """
-        Validates the reference image and extracts facial embedding using fh_core.
-        """
+        """Validate reference image and extract facial embedding."""
         try:
             self.image_validated = False
             file_path = self.image_path.get()
@@ -87,7 +99,7 @@ class FaceHuntInputSelection:
             self.update_status()
 
     def select_local_video(self):
-        """Open a dialog to select a local video file."""
+        """Open file dialog to select a local video file."""
         file_path = filedialog.askopenfilename(
             filetypes=[("Video files", "*.mp4 *.avi *.mov *.mkv *.webm"), ("All files", "*.*")]
         )
@@ -98,7 +110,7 @@ class FaceHuntInputSelection:
             self.video_status.config(text="✗", fg="red")
 
     def validate_video_source(self):
-        """Verify that the video source (local or YouTube) is real and accessible using fh_core."""
+        """Validate video source (local file or YouTube URL)."""
         try:
             source = self.video_source.get().strip()
             success, source_type, message = self.core.validate_video_source(source)
@@ -113,19 +125,19 @@ class FaceHuntInputSelection:
             self.update_status()
 
     def reset_image_validation(self, *_):
-        """Resets the validation status of the image when the path changes."""
+        """Reset image validation status when path changes."""
         if self.image_validated:
             self.image_validated = False
             self.update_status()
 
     def reset_video_validation(self, *_):
-        """Resets the validation status of the video when the source changes."""
+        """Reset video validation status when source changes."""
         if self.source_validated:
             self.source_validated = False
             self.update_status()
 
     def update_status(self):
-        """Update the status labels with (✓) or (✗) and colors."""
+        """Update validation status indicators (✓/✗)."""
         if self.image_validated:
             self.image_status.config(text="✓", fg="green")
         else:
@@ -137,7 +149,7 @@ class FaceHuntInputSelection:
             self.video_status.config(text="✗", fg="red")
 
     def proceed_to_next_step(self):
-        """"""
+        """Proceed to video download or frame extraction based on source type."""
         if not self.image_validated or not self.source_validated:
             messagebox.showerror("Error","Please validate both the image and the video source")
             return
@@ -153,12 +165,12 @@ class FaceHuntInputSelection:
             self.setup_download_ui()
 
     def clear_window(self):
-        """Destroys all widgets in the main window."""
+        """Clear all widgets from the window."""
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def setup_download_ui(self):
-        """Sets up the download interface."""
+        """Setup UI for YouTube video download."""
         self.root.title("FaceHunt - Video Download")
         tk.Label(self.root, text="Download YouTube video").pack(pady=5)
         tk.Button(self.root, text="Start Download", command=self.start_download).pack(pady=10)
@@ -167,7 +179,7 @@ class FaceHuntInputSelection:
         self.progress_bar.pack(pady=5, fill="x", padx=10)
 
     def start_download(self):
-        """Starts the download using VideoDownloader"""
+        """Download YouTube video and proceed to frame extraction."""
         downloader = VideoDownloader(self.root, self.progress, self.youtube_url_to_download)
         self.video_path = downloader.download()
         if self.video_path:
@@ -177,7 +189,7 @@ class FaceHuntInputSelection:
             messagebox.showerror("Error", "Download failed. Check previous errors.")
 
     def initialize_frame_extractor(self):
-        """Initializes VideoFrameExtractor and sets up extraction."""
+        """Initialize video frame extractor and setup extraction UI."""
         self.frame_extractor = VideoFrameExtractor(self.video_path)
         success, message = self.frame_extractor.open_video()
         if success:
@@ -186,7 +198,7 @@ class FaceHuntInputSelection:
             messagebox.showerror("Error", message)
 
     def setup_extraction_ui(self):
-        """Sets up the UI for video frame extraction process."""
+        """Setup UI for frame extraction and recognition process."""
         self.clear_window()
         self.root.title("FaceHunt - Video processor")
 
@@ -237,7 +249,7 @@ class FaceHuntInputSelection:
             return
 
     def start_recognition(self):
-        """Run face recognition using extracted frames."""
+        """Run face recognition on extracted frames and display results."""
         self.step3_label.config(text="🔵 Find matches", fg="orange")
         self.root.update()
 
@@ -264,4 +276,4 @@ class FaceHuntInputSelection:
             result_message += "\n".join(match_lines)
             messagebox.showinfo("Result", result_message)
 
-            self.step3_label.config(text="✅ Find matches", fg="green")
+        self.step3_label.config(text="✅ Find matches", fg="green")

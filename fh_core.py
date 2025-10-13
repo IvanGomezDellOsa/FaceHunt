@@ -8,7 +8,7 @@ from deepface import DeepFace
 
 
 class FaceHuntCore:
-    """    Handles all non-GUI logic for the FaceHunt application """
+    """Handles core validation and processing logic for FaceHunt application."""
 
     def validate_image_file(self, file_path):
         """
@@ -31,7 +31,8 @@ class FaceHuntCore:
     @staticmethod
     def _create_temp_image_copy(file_path):
         """
-        Create a temporary copy of the image with a safe name (ASCII).
+        Create temporary copy of image with ASCII-safe name.
+
         Required because DeepFace fails with non-ASCII paths.
 
         Args:
@@ -52,14 +53,13 @@ class FaceHuntCore:
 
     def _extract_face_embedding(self, file_path):
         """
-        Extract the facial embedding from the image using DeepFace with Facenet.
+        Extract facial embedding using DeepFace with FaceNet model.
 
         Process:
-        1. Verify that the image can be opened and decoded from bytes
-        2. Create a temporary copy of the image with a safe ASCII name
-           (required because DeepFace fails with non-ASCII paths)
-        3. Use DeepFace.represent() to compute the facial embedding
-        4. Validate that exactly one face is detected in the image
+        1. Load and decode image from bytes
+        2. Create temporary copy with ASCII-safe name
+        3. Extract embedding using DeepFace
+        4. Validate exactly one face is detected
 
         Returns:
             tuple: (success: bool, embedding: list or None, message: str)
@@ -102,10 +102,11 @@ class FaceHuntCore:
 
     def validate_video_source(self, source):
         """
-        Verify that the video source (local or YouTube) is real and accessible.
+        Validate video source (local file or YouTube URL).
 
         Returns:
-            tuple: (success: bool, source_type: str ('local' or 'YouTube'), message: str)
+            tuple: (success: bool, source_type: str or None, message: str)
+                   source_type is 'local' or 'youtube' only when success=True
         """
         if not source:
             return False, None, "Video source cannot be empty."

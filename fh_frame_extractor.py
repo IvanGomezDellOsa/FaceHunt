@@ -2,7 +2,14 @@ import cv2
 import os
 
 class VideoFrameExtractor:
+    """Extracts and preprocesses video frames for face recognition."""
     def __init__(self, video_path):
+        """
+        Initialize frame extractor.
+
+        Args:
+            video_path: Path to video file
+        """
         self.video_path = video_path
         self.video_capture = None
         self.frame_interval = None
@@ -11,7 +18,11 @@ class VideoFrameExtractor:
         self.total_processable_frames = 0
 
     def open_video(self):
-        """Open the video using cv2.VideoCapture and return the capture or error details."""
+        """
+        Open video file and extract metadata (FPS, frame count).
+        Returns:
+            tuple: (success: bool, error_message: str or None)
+        """
         try:
             if not os.path.exists(self.video_path):
                 return False, "Video file not found"
@@ -45,8 +56,15 @@ class VideoFrameExtractor:
             return False, str(e)
 
     def determine_interval(self, mode="Balanced"):
-        """Determine frame interval based on FPS and selected mode."""
+        """
+        Calculate frame sampling interval based on mode.
 
+        Args:
+            mode: "High Precision" (0.25s) or "Balanced" (0.5s)
+
+        Returns:
+            int: Frame interval (number of frames to skip)
+        """
         if mode == "High Precision":
             seconds_per_sample = 0.25 # 1 frame every 0.25s
         else: # Mode = Balanced
@@ -57,7 +75,12 @@ class VideoFrameExtractor:
         return self.frame_interval
 
     def _is_large_video(self):
-        """Check if video is considered large (>100MB or >30min)."""
+        """
+        Check if video requires batch processing (>100MB or >30min).
+
+        Returns:
+            bool: True if video is large
+        """
         try:
             if os.path.getsize(self.video_path) > 100 * 1024 * 1024:  # 100MB
                 return True
@@ -74,11 +97,16 @@ class VideoFrameExtractor:
 
     def extract_frames(self):
         """
-         Automatically chooses processing mode based on video size:
-            - Normal mode: Returns single batch (videos <30min or <100MB)
-            - Batch mode: Yields multiple batches of 100 frames (large videos)
-         Extract and preprocess frames specifically for FaceNet model.
-         Preprocessing steps
+        Extract and preprocess frames for FaceNet model.
+
+        Automatically uses batch mode (100 frames per batch) for large videos,
+        or single batch mode for smaller videos. Converts frames to RGB.
+
+        Yields:
+            list: Batch of tuples (preprocessed_frame, frame_index)
+
+        Raises:
+            RuntimeError: If video or frame interval not initialized
         """
         if self.video_capture is None or self.frame_interval is None:
             raise RuntimeError("Video or frame interval not initialized")
@@ -91,7 +119,7 @@ class VideoFrameExtractor:
             else:
                 print("Extracting frames for FaceNet...")
 
-            buffer =[]
+            buffer = []
             processed_count = 0
             frame_index = 0
 
@@ -122,7 +150,12 @@ class VideoFrameExtractor:
             self.release_video()
 
     def process_video(self):
-        """Main processing method with proper resource management."""
+        """
+        Start frame extraction process with validation.
+
+        Returns:
+            tuple: (success: bool, generator or error_message: str)
+        """
         try:
             if self.frame_interval is None or self.frame_interval <= 0:
                 raise RuntimeError("Frame interval not initialized.")
@@ -135,7 +168,7 @@ class VideoFrameExtractor:
             return False, f"Error starting extraction: {str(e)}"
 
     def release_video(self):
-        """Release the video capture resource."""
+        """Release video capture resource."""
         if self.video_capture is not None:
             self.video_capture.release()
             self.video_capture = None

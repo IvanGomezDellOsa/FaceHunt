@@ -2,14 +2,32 @@ from deepface import DeepFace
 import numpy as np
 
 class FaceRecognizer:
-    """Recognizes faces in video frames using FaceNet model via DeepFace."""
+    """Performs face recognition on video frames using FaceNet embeddings."""
     def __init__(self, reference_embedding):
+        """
+        Initialize face recognizer with reference embedding.
+        Args:
+            reference_embedding: FaceNet embedding from reference image
+        """
         self.reference_embedding = np.array(reference_embedding)
         self.reference_norm = np.linalg.norm(self.reference_embedding)
         self.model_name = 'Facenet'
 
     def find_matches(self, frame_generator, threshold=0.4, fps=30, processable_frames=0):
-        """ Compare frames with reference embedding using cosine distance. (0.3-0.4 strict, 0.5-0.6 permissive) """
+        """
+        Find frames containing faces matching the reference embedding.
+
+        Compares frames using cosine distance. Lower values indicate higher similarity.
+
+        Args:
+            frame_generator: Generator yielding batches of (frame, frame_index) tuples
+            threshold: Cosine distance threshold (0.3-0.4 strict, 0.5-0.6 permissive)
+            fps: Video frames per second
+            processable_frames: Total frames to process (for progress tracking)
+
+        Returns:
+            list: Dictionaries with 'frame_index' and 'timestamp' for each match
+        """
         matches = []
         processed = 0
         skipped = 0
@@ -60,7 +78,6 @@ class FaceRecognizer:
                 except Exception as e:
                     if skipped == 0:
                         print(f"--> {e}")
-
                     skipped += 1
 
         print("=" * 60)
