@@ -12,22 +12,6 @@ class VideoDownloader:
         self.youtube_url = youtube_url
         self.output_dir = "videos"
 
-    def sanitize_filename(self, title):
-        """Convert video title to safe ASCII filename."""
-        ascii_title = unidecode(title)
-
-        prohibited = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '@', '#', '%']
-        for char in prohibited:
-            ascii_title = ascii_title.replace(char, '_')
-
-        ascii_title = ' '.join(ascii_title.split())
-        ascii_title = ascii_title[:100]
-
-        if not ascii_title or ascii_title.isspace():
-            ascii_title = "video_download"
-
-        return ascii_title
-
     def download(self):
         """Downloads the video in MP4/480p with multiple download control."""
         try:
@@ -45,8 +29,7 @@ class VideoDownloader:
 
             disk_usage = shutil.disk_usage(self.output_dir)
             if disk_usage.free < estimated_size * 1.1:  # %10+
-                messagebox.showerror("Error",
-                                     f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024)} MB.")
+                messagebox.showerror("Error",f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024)} MB.")
                 return None
             if not os.access(self.output_dir, os.W_OK):
                 messagebox.showerror("Error", "No write permissions in videos directory.")
@@ -55,7 +38,6 @@ class VideoDownloader:
             if os.path.exists(video_file):
                 return video_file
 
-            # Download options
             ydl_opts = {
                 'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best', # DeepFace works well with 480p
                 'outtmpl': f'{self.output_dir}/{clean_title}.%(ext)s',
@@ -72,6 +54,22 @@ class VideoDownloader:
         except Exception as e:
             messagebox.showerror("Error", f"Download failed: {str(e)}")
             return None
+
+    def sanitize_filename(self, title):
+        """Convert video title to safe ASCII filename."""
+        ascii_title = unidecode(title)
+
+        prohibited = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '@', '#', '%']
+        for char in prohibited:
+            ascii_title = ascii_title.replace(char, '_')
+
+        ascii_title = ' '.join(ascii_title.split())
+        ascii_title = ascii_title[:100]
+
+        if not ascii_title or ascii_title.isspace():
+            ascii_title = "video_download"
+
+        return ascii_title
 
     def progress_hook(self, d):
         """Update the progress bar during the download."""

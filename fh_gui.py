@@ -12,13 +12,14 @@ class FaceHuntInputSelection:
     def __init__(self, root):
         self.root = root
         self.root.title("FaceHunt - Input Selection")
-        self.root.geometry("800x450")
+        self.root.geometry("800x500")
 
         self.core = FaceHuntCore()
 
         self.image_path = tk.StringVar(value="")
         self.video_source = tk.StringVar(value="")
-        self.video_source.trace("w", self.reset_video_validation)
+        self.image_path.trace_add("write", self.reset_image_validation)
+        self.video_source.trace_add("write", self.reset_video_validation)
 
         self.image_validated = False
         self.source_validated = False
@@ -39,7 +40,7 @@ class FaceHuntInputSelection:
         self.step3_label = None
 
         # Imagen
-        tk.Label(root, text="Select an image (JPG/PNG/WebP)").pack(pady=5)
+        tk.Label(root, text="Select an image with a single face (JPG/PNG/WebP)").pack(pady=5)
         tk.Entry(root, textvariable=self.image_path, width=40).pack(pady=10)
         tk.Button(root, text="Browse Image", command=self.select_image).pack(pady=5)
         tk.Button(root, text="Validate Image", command=self.validate_image).pack(pady=15)
@@ -96,13 +97,6 @@ class FaceHuntInputSelection:
             self.source_validated = False
             self.video_status.config(text="✗", fg="red")
 
-    def reset_video_validation(self, *_):
-        """Reset the validation status of the video when the text changes."""
-        if self.source_validated:
-            self.video_status.config(text="✗", fg="red")
-            self.source_validated = False
-            self.update_status()
-
     def validate_video_source(self):
         """Verify that the video source (local or YouTube) is real and accessible using fh_core."""
         try:
@@ -117,6 +111,30 @@ class FaceHuntInputSelection:
                 messagebox.showerror("Error", message)
         finally:
             self.update_status()
+
+    def reset_image_validation(self, *_):
+        """Resets the validation status of the image when the path changes."""
+        if self.image_validated:
+            self.image_validated = False
+            self.update_status()
+
+    def reset_video_validation(self, *_):
+        """Resets the validation status of the video when the source changes."""
+        if self.source_validated:
+            self.source_validated = False
+            self.update_status()
+
+    def update_status(self):
+        """Update the status labels with (✓) or (✗) and colors."""
+        if self.image_validated:
+            self.image_status.config(text="✓", fg="green")
+        else:
+            self.image_status.config(text="✗", fg="red")
+
+        if self.source_validated:
+            self.video_status.config(text="✓", fg="green")
+        else:
+            self.video_status.config(text="✗", fg="red")
 
     def proceed_to_next_step(self):
         """"""
@@ -133,18 +151,6 @@ class FaceHuntInputSelection:
             self.youtube_url_to_download = source
             self.clear_window()
             self.setup_download_ui()
-
-    def update_status(self):
-        """Update the status labels with (✓) or (✗) and colors."""
-        if self.image_validated:
-            self.image_status.config(text="✓", fg="green")
-        else:
-            self.image_status.config(text="✗", fg="red")
-
-        if self.source_validated:
-            self.video_status.config(text="✓", fg="green")
-        else:
-            self.video_status.config(text="✗", fg="red")
 
     def clear_window(self):
         """Destroys all widgets in the main window."""
