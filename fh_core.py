@@ -89,10 +89,13 @@ class FaceHuntCore:
 
             embedding = result[0]["embedding"]
             return True, embedding, f"Valid image with 1 face detected: {os.path.basename(file_path)}"
-        except ValueError as e:
-            return False, None, f"Face detection failed: {str(e)}"
+
+        except ValueError:
+            return False, None, f"Face detection failed"
+
         except Exception as e:
             return False, None, f"Unexpected error during face embedding extraction: {str(e)}"
+
         finally:
             if temp_path and os.path.exists(temp_path):
                 os.remove(temp_path)

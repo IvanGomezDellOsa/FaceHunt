@@ -25,11 +25,11 @@ class VideoDownloader:
 
             estimated_size = info.get('filesize_approx', 0)
             if not estimated_size:
-                estimated_size = 800 * 1024 * 1024  # 800 MB if info.get fails
+                estimated_size = 800 * 1024 * 1024  # 800 MB
 
             disk_usage = shutil.disk_usage(self.output_dir)
-            if disk_usage.free < estimated_size * 1.1:  # %10+
-                messagebox.showerror("Error",f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024)} MB.")
+            if disk_usage.free < estimated_size * 1.1:  # +10% safety margin
+                messagebox.showerror("Error",f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024):.0f} MB.")
                 return None
             if not os.access(self.output_dir, os.W_OK):
                 messagebox.showerror("Error", "No write permissions in videos directory.")
@@ -39,7 +39,7 @@ class VideoDownloader:
                 return video_file
 
             ydl_opts = {
-                'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best', # DeepFace works well with 480p
+                'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best',
                 'outtmpl': f'{self.output_dir}/{clean_title}.%(ext)s',
                 'progress_hooks': [self.progress_hook],
                 'noplaylist': True,

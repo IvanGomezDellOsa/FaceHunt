@@ -19,7 +19,7 @@ class FaceRecognizer:
         for batch in frame_generator:
             for frame, frame_idx in batch:
                 try:
-                    result = DeepFace.represent(frame, model_name = self.model_name, enforce_detection = False)
+                    result = DeepFace.represent(frame, model_name=self.model_name, enforce_detection=False)
 
                     if isinstance(result, dict):
                         result = [result]

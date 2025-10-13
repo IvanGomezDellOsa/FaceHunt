@@ -47,8 +47,8 @@ class VideoFrameExtractor:
     def determine_interval(self, mode="Balanced"):
         """Determine frame interval based on FPS and selected mode."""
         fps = self.video_capture.get(cv2.CAP_PROP_FPS)
-        if fps<=0:
-            fps=30
+        if fps <= 0:
+            fps = 30
 
         if mode == "High Precision":
             seconds_per_sample = 0.25 # 1 frame every 0.25s
@@ -70,7 +70,9 @@ class VideoFrameExtractor:
 
             duration_minutes = self.total_frames / self.fps / 60
             return duration_minutes > 30
-        except Exception:
+
+        except (OSError, ZeroDivisionError) as e:
+            print(f"Could not determine video size/duration: {e}")
             return False
 
     def extract_frames(self):
@@ -85,11 +87,12 @@ class VideoFrameExtractor:
             raise RuntimeError("Video or frame interval not initialized")
         try:
             use_batch = self._is_large_video()
+            batch_size = 100
+
             if use_batch:
-                batch_size = 100
                 print("Extracting frames for FaceNet in batch mode...")
             else:
-                print("Extracting frames for FaceNet in normal mode...")
+                print("Extracting frames for FaceNet...")
 
             buffer =[]
             processed_count = 0

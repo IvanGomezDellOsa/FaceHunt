@@ -32,7 +32,7 @@ class FaceHuntInputSelection:
 
         self.progress = None
         self.progress_bar = None
-        self.progress_frame = None
+        self.progress_container = None
         self.mode_var = None
         self.mode_selector = None
         self.step1_label = None
@@ -195,21 +195,21 @@ class FaceHuntInputSelection:
         self.mode_var = tk.StringVar(value="Balanced")
         modes = ["High Precision", "Balanced"]
         self.mode_selector = ttk.Combobox(self.root, textvariable=self.mode_var, values=modes, state="readonly")
-        self.mode_selector.pack(pady=5)
+        self.mode_selector.pack(pady=10)
 
         self.recognize_button = tk.Button(self.root, text="Start Recognition", command=self.start_extraction)
         self.recognize_button.pack(pady=15)
 
-        self.progress_frame = tk.Frame(self.root)
-        self.progress_frame.pack(pady=20)
+        self.progress_container = tk.Frame(self.root)
+        self.progress_container.pack(pady=20)
 
-        self.step1_label = tk.Label(self.progress_frame, text="⚪ Determine frame interval", font=("Arial", 9))
+        self.step1_label = tk.Label(self.progress_container, text="⚪ Determine frame interval", font=("Arial", 12))
         self.step1_label.pack(pady=2, anchor="center")
 
-        self.step2_label = tk.Label(self.progress_frame, text="⚪ Extract frames", font=("Arial", 9))
+        self.step2_label = tk.Label(self.progress_container, text="⚪ Extract frames", font=("Arial", 12))
         self.step2_label.pack(pady=2, anchor="center")
 
-        self.step3_label = tk.Label(self.progress_frame, text="⚪ Find matches", font=("Arial", 9))
+        self.step3_label = tk.Label(self.progress_container, text="⚪ Find matches", font=("Arial", 12))
         self.step3_label.pack(pady=2, anchor="center")
 
     def start_extraction(self):
@@ -265,4 +265,4 @@ class FaceHuntInputSelection:
             result_message += "\n".join(match_lines)
             messagebox.showinfo("Result", result_message)
 
-        self.step3_label.config(text="✅ Find matches", fg="green")
+            self.step3_label.config(text="✅ Find matches", fg="green")
