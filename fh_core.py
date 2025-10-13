@@ -116,7 +116,7 @@ class FaceHuntCore:
                 cap.release()
                 return True, 'local', "Valid local video file."
             else:
-                return False, 'local', "Invalid or unsupported video format."
+                return False, None , "Invalid or unsupported video format."
 
         try:
             with yt_dlp.YoutubeDL({'quiet': True, 'noplaylist': True}) as ydl:
@@ -124,6 +124,6 @@ class FaceHuntCore:
             return True, 'youtube', f"Valid YouTube URL:\n{info.get('title', 'Unknown')}"
 
         except yt_dlp.utils.DownloadError:
-            return False, 'youtube', "The path is not a valid local file or a YouTube URL."
+            return False, None, "The path is not a valid local file or a YouTube URL."
         except Exception as e:
-            return False, 'youtube', f"An unexpected error occurred: {e}"
+            return False, None , f"An unexpected error occurred: {e}"

@@ -14,7 +14,7 @@ class VideoFrameExtractor:
         """Open the video using cv2.VideoCapture and return the capture or error details."""
         try:
             if not os.path.exists(self.video_path):
-                return None, "Video file not found"
+                return False, "Video file not found"
 
             self.video_capture = cv2.VideoCapture(self.video_path)
             if not self.video_capture.isOpened():
@@ -46,16 +46,13 @@ class VideoFrameExtractor:
 
     def determine_interval(self, mode="Balanced"):
         """Determine frame interval based on FPS and selected mode."""
-        fps = self.video_capture.get(cv2.CAP_PROP_FPS)
-        if fps <= 0:
-            fps = 30
 
         if mode == "High Precision":
             seconds_per_sample = 0.25 # 1 frame every 0.25s
         else: # Mode = Balanced
             seconds_per_sample = 0.5 # 1 frame every 0.5s
 
-        self.frame_interval = int(fps * seconds_per_sample)
+        self.frame_interval = int(self.fps * seconds_per_sample)
 
         return self.frame_interval
 
@@ -111,7 +108,7 @@ class VideoFrameExtractor:
                     if use_batch and len(buffer) >= batch_size:
                         yield buffer
                         buffer = []
-                if processed_count % 200 == 0:
+                if processed_count > 0 and processed_count % 200 == 0:
                     print(f"Extracting frames...")
 
                 frame_index += 1
@@ -127,6 +124,9 @@ class VideoFrameExtractor:
     def process_video(self):
         """Main processing method with proper resource management."""
         try:
+            if self.frame_interval is None or self.frame_interval <= 0:
+                raise RuntimeError("Frame interval not initialized.")
+
             gen = self.extract_frames()
             self.total_processable_frames = (self.total_frames // self.frame_interval)
             return True, gen

@@ -218,16 +218,15 @@ class FaceHuntInputSelection:
 
         mode = self.mode_var.get()
 
-        success_interval = self.frame_extractor.determine_interval(mode)
-        if success_interval:
-            self.step1_label.config(text="✅ Determine frame interval", fg="green")
-            self.root.update()
-        else:
+        interval = self.frame_extractor.determine_interval(mode)
+        if interval <= 0:
             messagebox.showerror("Error", "Failed to determine frame interval")
             return
 
-        success, result = self.frame_extractor.process_video()
+        self.step1_label.config(text="✅ Determine frame interval", fg="green")
+        self.root.update()
 
+        success, result = self.frame_extractor.process_video()
         self.frame_generator = result
 
         if success:

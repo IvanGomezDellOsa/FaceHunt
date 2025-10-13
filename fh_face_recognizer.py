@@ -1,11 +1,11 @@
 from deepface import DeepFace
-from scipy.spatial.distance import cosine
 import numpy as np
 
 class FaceRecognizer:
     """Recognizes faces in video frames using FaceNet model via DeepFace."""
     def __init__(self, reference_embedding):
         self.reference_embedding = np.array(reference_embedding)
+        self.reference_norm = np.linalg.norm(self.reference_embedding)
         self.model_name = 'Facenet'
 
     def find_matches(self, frame_generator, threshold=0.4, fps=30, processable_frames=0):
@@ -27,8 +27,11 @@ class FaceRecognizer:
                     frame_has_match = False
 
                     for face_data in result:
+                        # Calculate cosine distance
                         frame_embedding = np.array(face_data['embedding'])
-                        distance = cosine(self.reference_embedding, frame_embedding)
+                        dot_product = np.dot(self.reference_embedding, frame_embedding)
+                        frame_norm = np.linalg.norm(frame_embedding)
+                        distance = 1 - (dot_product / (self.reference_norm * frame_norm))
 
                         if distance < threshold:
                             frame_has_match = True

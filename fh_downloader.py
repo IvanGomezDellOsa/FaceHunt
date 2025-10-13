@@ -21,7 +21,7 @@ class VideoDownloader:
                 info = ydl.extract_info(self.youtube_url, download=False)
                 video_title = info['title']
                 clean_title = self.sanitize_filename(video_title)
-                video_file = f"{self.output_dir}/{clean_title}.mp4"
+                video_file = os.path.join(self.output_dir, f"{clean_title}.mp4")
 
             estimated_size = info.get('filesize_approx', 0)
             if not estimated_size:
@@ -40,7 +40,7 @@ class VideoDownloader:
 
             ydl_opts = {
                 'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best',
-                'outtmpl': f'{self.output_dir}/{clean_title}.%(ext)s',
+                'outtmpl': os.path.join(self.output_dir, f'{clean_title}.%(ext)s'),
                 'progress_hooks': [self.progress_hook],
                 'noplaylist': True,
                 'quiet': True
