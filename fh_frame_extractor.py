@@ -1,8 +1,10 @@
 import cv2
 import os
 
+
 class VideoFrameExtractor:
     """Extracts and preprocesses video frames for face recognition."""
+
     def __init__(self, video_path):
         """
         Initialize frame extractor.
@@ -66,9 +68,9 @@ class VideoFrameExtractor:
             int: Frame interval (number of frames to skip)
         """
         if mode == "High Precision":
-            seconds_per_sample = 0.25 # 1 frame every 0.25s
-        else: # Mode = Balanced
-            seconds_per_sample = 0.5 # 1 frame every 0.5s
+            seconds_per_sample = 0.25  # 1 frame every 0.25s
+        else:  # Mode = Balanced
+            seconds_per_sample = 0.5  # 1 frame every 0.5s
 
         self.frame_interval = int(self.fps * seconds_per_sample)
 
@@ -161,7 +163,7 @@ class VideoFrameExtractor:
                 raise RuntimeError("Frame interval not initialized.")
 
             gen = self.extract_frames()
-            self.total_processable_frames = (self.total_frames // self.frame_interval)
+            self.total_processable_frames = self.total_frames // self.frame_interval
             return True, gen
         except Exception as e:
             self.release_video()

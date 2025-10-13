@@ -15,6 +15,7 @@ class FaceHuntInputSelection:
     Handles the complete workflow: image validation, video source selection,
     optional YouTube download, frame extraction, and face recognition.
     """
+
     def __init__(self, root):
         """
         Initialize the FaceHunt GUI.
@@ -54,27 +55,39 @@ class FaceHuntInputSelection:
         self.step3_label = None
 
         # Imagen
-        tk.Label(root, text="Select an image with a single face (JPG/PNG/WebP)").pack(pady=5)
+        tk.Label(root, text="Select an image with a single face (JPG/PNG/WebP)").pack(
+            pady=5
+        )
         tk.Entry(root, textvariable=self.image_path, width=40).pack(pady=10)
         tk.Button(root, text="Browse Image", command=self.select_image).pack(pady=5)
-        tk.Button(root, text="Validate Image", command=self.validate_image).pack(pady=15)
+        tk.Button(root, text="Validate Image", command=self.validate_image).pack(
+            pady=15
+        )
         self.image_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
         self.image_status.pack(pady=2)
 
         # Video Source
         tk.Label(root, text="Enter YouTube URL or select a local file: ").pack(pady=20)
         tk.Entry(root, textvariable=self.video_source, width=50).pack(pady=5)
-        tk.Button(root, text="Browse Local Video", command=self.select_local_video).pack(pady=5)
+        tk.Button(
+            root, text="Browse Local Video", command=self.select_local_video
+        ).pack(pady=5)
 
-        tk.Button(root, text="Validate Video Source", command=self.validate_video_source).pack(pady=10)
+        tk.Button(
+            root, text="Validate Video Source", command=self.validate_video_source
+        ).pack(pady=10)
         self.video_status = tk.Label(root, text="✗", fg="red", font=("Arial", 14))
         self.video_status.pack(pady=2)
 
-        tk.Button(root, text="Next Step", command=self.proceed_to_next_step).pack(pady=10)
+        tk.Button(root, text="Next Step", command=self.proceed_to_next_step).pack(
+            pady=10
+        )
 
     def select_image(self):
         """Open file dialog to select a reference image."""
-        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.webp")])
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Image files", "*.jpg *.png *.webp")]
+        )
         if file_path:
             self.image_path.set(file_path)
             self.image_validated = False
@@ -101,7 +114,10 @@ class FaceHuntInputSelection:
     def select_local_video(self):
         """Open file dialog to select a local video file."""
         file_path = filedialog.askopenfilename(
-            filetypes=[("Video files", "*.mp4 *.avi *.mov *.mkv *.webm"), ("All files", "*.*")]
+            filetypes=[
+                ("Video files", "*.mp4 *.avi *.mov *.mkv *.webm"),
+                ("All files", "*.*"),
+            ]
         )
         if file_path:
             self.video_source.set(file_path)
@@ -151,7 +167,9 @@ class FaceHuntInputSelection:
     def proceed_to_next_step(self):
         """Proceed to video download or frame extraction based on source type."""
         if not self.image_validated or not self.source_validated:
-            messagebox.showerror("Error","Please validate both the image and the video source")
+            messagebox.showerror(
+                "Error", "Please validate both the image and the video source"
+            )
             return
 
         source = self.video_source.get().strip()
@@ -173,17 +191,25 @@ class FaceHuntInputSelection:
         """Setup UI for YouTube video download."""
         self.root.title("FaceHunt - Video Download")
         tk.Label(self.root, text="Download YouTube video").pack(pady=5)
-        tk.Button(self.root, text="Start Download", command=self.start_download).pack(pady=10)
+        tk.Button(self.root, text="Start Download", command=self.start_download).pack(
+            pady=10
+        )
         self.progress = tk.DoubleVar()
-        self.progress_bar = ttk.Progressbar(self.root, variable=self.progress, maximum=100)
+        self.progress_bar = ttk.Progressbar(
+            self.root, variable=self.progress, maximum=100
+        )
         self.progress_bar.pack(pady=5, fill="x", padx=10)
 
     def start_download(self):
         """Download YouTube video and proceed to frame extraction."""
-        downloader = VideoDownloader(self.root, self.progress, self.youtube_url_to_download)
+        downloader = VideoDownloader(
+            self.root, self.progress, self.youtube_url_to_download
+        )
         self.video_path = downloader.download()
         if self.video_path:
-            messagebox.showinfo("Success", f"Video downloaded successfully: {self.video_path}")
+            messagebox.showinfo(
+                "Success", f"Video downloaded successfully: {self.video_path}"
+            )
             self.initialize_frame_extractor()
         else:
             messagebox.showerror("Error", "Download failed. Check previous errors.")
@@ -206,22 +232,34 @@ class FaceHuntInputSelection:
 
         self.mode_var = tk.StringVar(value="Balanced")
         modes = ["High Precision", "Balanced"]
-        self.mode_selector = ttk.Combobox(self.root, textvariable=self.mode_var, values=modes, state="readonly")
+        self.mode_selector = ttk.Combobox(
+            self.root, textvariable=self.mode_var, values=modes, state="readonly"
+        )
         self.mode_selector.pack(pady=10)
 
-        self.recognize_button = tk.Button(self.root, text="Start Recognition", command=self.start_extraction)
+        self.recognize_button = tk.Button(
+            self.root, text="Start Recognition", command=self.start_extraction
+        )
         self.recognize_button.pack(pady=15)
 
         self.progress_container = tk.Frame(self.root)
         self.progress_container.pack(pady=20)
 
-        self.step1_label = tk.Label(self.progress_container, text="⚪ Determine frame interval", font=("Arial", 12))
+        self.step1_label = tk.Label(
+            self.progress_container,
+            text="⚪ Determine frame interval",
+            font=("Arial", 12),
+        )
         self.step1_label.pack(pady=2, anchor="center")
 
-        self.step2_label = tk.Label(self.progress_container, text="⚪ Extract frames", font=("Arial", 12))
+        self.step2_label = tk.Label(
+            self.progress_container, text="⚪ Extract frames", font=("Arial", 12)
+        )
         self.step2_label.pack(pady=2, anchor="center")
 
-        self.step3_label = tk.Label(self.progress_container, text="⚪ Find matches", font=("Arial", 12))
+        self.step3_label = tk.Label(
+            self.progress_container, text="⚪ Find matches", font=("Arial", 12)
+        )
         self.step3_label.pack(pady=2, anchor="center")
 
     def start_extraction(self):
@@ -259,7 +297,7 @@ class FaceHuntInputSelection:
                 self.frame_generator,
                 threshold=0.4,
                 fps=self.frame_extractor.fps,
-                processable_frames = self.frame_extractor.total_processable_frames
+                processable_frames=self.frame_extractor.total_processable_frames,
             )
         except Exception as e:
             messagebox.showerror("Error", f"Processing failed: {e}")

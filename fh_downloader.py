@@ -35,33 +35,39 @@ class VideoDownloader:
         try:
             os.makedirs(self.output_dir, exist_ok=True)
 
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
                 info = ydl.extract_info(self.youtube_url, download=False)
-                video_title = info['title']
+                video_title = info["title"]
                 clean_title = self.sanitize_filename(video_title)
                 video_file = os.path.join(self.output_dir, f"{clean_title}.mp4")
 
-            estimated_size = info.get('filesize_approx', 0)
+            estimated_size = info.get("filesize_approx", 0)
             if not estimated_size:
+
                 estimated_size = 800 * 1024 * 1024  # 800 MB default estimate
 
             disk_usage = shutil.disk_usage(self.output_dir)
             if disk_usage.free < estimated_size * 1.1:  # +10% safety margin
-                messagebox.showerror("Error",f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024):.0f} MB.")
+                messagebox.showerror(
+                    "Error",
+                    f"Insufficient disk space. Need at least {estimated_size / (1024 * 1024):.0f} MB.",
+                )
                 return None
             if not os.access(self.output_dir, os.W_OK):
-                messagebox.showerror("Error", "No write permissions in videos directory.")
+                messagebox.showerror(
+                    "Error", "No write permissions in videos directory."
+                )
                 return None
 
             if os.path.exists(video_file):
                 return video_file
 
             ydl_opts = {
-                'format': 'bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best',
-                'outtmpl': os.path.join(self.output_dir, f'{clean_title}.%(ext)s'),
-                'progress_hooks': [self.progress_hook],
-                'noplaylist': True,
-                'quiet': True
+                "format": "bestvideo[height<=480][ext=mp4]/best[ext=mp4]/best",
+                "outtmpl": os.path.join(self.output_dir, f"{clean_title}.%(ext)s"),
+                "progress_hooks": [self.progress_hook],
+                "noplaylist": True,
+                "quiet": True,
             }
 
             self.progress_var.set(0)
@@ -87,11 +93,11 @@ class VideoDownloader:
         """
         ascii_title = unidecode(title)
 
-        prohibited = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '@', '#', '%']
+        prohibited = ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "@", "#", "%"]
         for char in prohibited:
-            ascii_title = ascii_title.replace(char, '_')
+            ascii_title = ascii_title.replace(char, "_")
 
-        ascii_title = ' '.join(ascii_title.split())
+        ascii_title = " ".join(ascii_title.split())
         ascii_title = ascii_title[:100]
 
         if not ascii_title or ascii_title.isspace():
@@ -105,11 +111,11 @@ class VideoDownloader:
         Args:
             d: Progress dictionary from yt-dlp
         """
-        if d['status'] == 'downloading':
-            if 'total_bytes' in d and 'downloaded_bytes' in d:
-                progress = (d['downloaded_bytes'] / d['total_bytes']) * 100
+        if d["status"] == "downloading":
+            if "total_bytes" in d and "downloaded_bytes" in d:
+                progress = (d["downloaded_bytes"] / d["total_bytes"]) * 100
                 self.progress_var.set(progress)
                 self.root.update()
-        elif d['status'] == 'finished':
+        elif d["status"] == "finished":
             self.progress_var.set(100)
             self.root.update()
