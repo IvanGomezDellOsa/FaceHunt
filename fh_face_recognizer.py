@@ -42,7 +42,10 @@ class FaceRecognizer:
             for frame, frame_idx in batch:
                 try:
                     result = DeepFace.represent(
-                        frame, model_name=self.model_name, enforce_detection=True
+                        frame,
+                        model_name=self.model_name,
+                        enforce_detection=True,
+                        detector_backend="ssd",
                     )
 
                     if isinstance(result, dict):

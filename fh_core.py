@@ -85,7 +85,10 @@ class FaceHuntCore:
                 )
 
             result = DeepFace.represent(
-                img_path=temp_path, model_name="Facenet", enforce_detection=True
+                img_path=temp_path,
+                model_name="Facenet",
+                enforce_detection=True,
+                detector_backend="retinaface",
             )
 
             if len(result) == 0:
@@ -98,6 +101,15 @@ class FaceHuntCore:
                 )
 
             embedding = result[0]["embedding"]
+
+            face_confidence = result[0].get("face_confidence", 1.0)
+            if face_confidence < 0.9:
+                return (
+                    False,
+                    None,
+                    f"Face detection confidence too low ({face_confidence:.2f}). Use a clearer, front-facing photo with good lighting.",
+                )
+
             return (
                 True,
                 embedding,

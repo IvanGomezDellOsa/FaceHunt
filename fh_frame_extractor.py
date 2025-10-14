@@ -68,9 +68,9 @@ class VideoFrameExtractor:
             int: Frame interval (number of frames to skip)
         """
         if mode == "High Precision":
-            seconds_per_sample = 0.25  # 1 frame every 0.25s
+            seconds_per_sample = 0.35  # 1 frame every 0.35s
         else:  # Mode = Balanced
-            seconds_per_sample = 0.5  # 1 frame every 0.5s
+            seconds_per_sample = 0.8  # 1 frame every 0.8s
 
         self.frame_interval = int(self.fps * seconds_per_sample)
 
