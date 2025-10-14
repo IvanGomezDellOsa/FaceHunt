@@ -295,7 +295,7 @@ class FaceHuntInputSelection:
             recognizer = FaceRecognizer(self.reference_face_embedding)
             matches = recognizer.find_matches(
                 self.frame_generator,
-                threshold=0.4,
+                threshold=0.32,
                 fps=self.frame_extractor.fps,
                 processable_frames=self.frame_extractor.total_processable_frames,
             )

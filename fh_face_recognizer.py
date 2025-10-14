@@ -16,7 +16,7 @@ class FaceRecognizer:
         self.model_name = "Facenet"
 
     def find_matches(
-        self, frame_generator, threshold=0.4, fps=30, processable_frames=0
+        self, frame_generator, threshold=0.32, fps=30, processable_frames=0
     ):
         """
         Find frames containing faces matching the reference embedding.
@@ -42,7 +42,7 @@ class FaceRecognizer:
             for frame, frame_idx in batch:
                 try:
                     result = DeepFace.represent(
-                        frame, model_name=self.model_name, enforce_detection=False
+                        frame, model_name=self.model_name, enforce_detection=True
                     )
 
                     if isinstance(result, dict):
@@ -51,8 +51,8 @@ class FaceRecognizer:
                     frame_has_match = False
 
                     for face_data in result:
-                        # Calculate cosine distance
                         frame_embedding = np.array(face_data["embedding"])
+                        # Calculate cosine distance
                         dot_product = np.dot(self.reference_embedding, frame_embedding)
                         frame_norm = np.linalg.norm(frame_embedding)
                         distance = 1 - (
@@ -89,10 +89,15 @@ class FaceRecognizer:
                             print(
                                 f"Progress: {processed} frames | Matches found: {len(matches)}"
                             )
+                except ValueError as e:
+                    if "Face could not be detected" not in str(e):
+                        if skipped == 0:
+                            print(f"--> Unexpected error: {e}")
+                    skipped += 1
 
                 except Exception as e:
                     if skipped == 0:
-                        print(f"--> {e}")
+                        print(f"--> Error: {e}")
                     skipped += 1
 
         print("=" * 60)
