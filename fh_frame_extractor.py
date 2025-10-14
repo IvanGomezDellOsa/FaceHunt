@@ -135,11 +135,17 @@ class VideoFrameExtractor:
                     buffer.append((processed_frame, frame_index))
                     processed_count += 1
 
+                    if processed_count % 50 == 0 and self.total_processable_frames > 0:
+                        percentage = (
+                            processed_count / self.total_processable_frames
+                        ) * 100
+                        print(
+                            f"Extracting frames... {processed_count}/{self.total_processable_frames} ({percentage:.0f}%)"
+                        )
+
                     if use_batch and len(buffer) >= batch_size:
                         yield buffer
                         buffer = []
-                if processed_count > 0 and processed_count % 200 == 0:
-                    print(f"Extracting frames...")
 
                 frame_index += 1
             if buffer:
@@ -147,6 +153,8 @@ class VideoFrameExtractor:
 
             if processed_count == 0:
                 raise RuntimeError("No frames extracted")
+            else:
+                print(f"Extraction complete: {processed_count} frames")
 
         finally:
             self.release_video()

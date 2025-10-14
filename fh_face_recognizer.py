@@ -5,18 +5,28 @@ import numpy as np
 class FaceRecognizer:
     """Performs face recognition on video frames using FaceNet embeddings."""
 
-    def __init__(self, reference_embedding):
+    def __init__(self, reference_embedding, detector_backend="mtcnn"):
         """
         Initialize face recognizer with reference embedding.
         Args:
             reference_embedding: FaceNet embedding from reference image
+            detector_backend: Face detector to use. Options:
+                - 'opencv': Fast, less accurate (default)
+                - 'mtcnn': Good accuracy, slower
+                - 'retinaface': Best accuracy, slowest
         """
         self.reference_embedding = np.array(reference_embedding)
         self.reference_norm = np.linalg.norm(self.reference_embedding)
         self.model_name = "Facenet"
+        self.detector_backend = detector_backend
 
     def find_matches(
-        self, frame_generator, threshold=0.32, fps=30, processable_frames=0
+        self,
+        frame_generator,
+        threshold=0.32,
+        fps=30,
+        processable_frames=0,
+        gui_root=None,
     ):
         """
         Find frames containing faces matching the reference embedding.
@@ -38,6 +48,7 @@ class FaceRecognizer:
 
         print("Starting face recognition...")
         print(f"Using threshold: {threshold} (cosine distance)")
+        print(f"Using detector: {self.detector_backend}")
         for batch in frame_generator:
             for frame, frame_idx in batch:
                 try:
@@ -45,7 +56,7 @@ class FaceRecognizer:
                         frame,
                         model_name=self.model_name,
                         enforce_detection=True,
-                        detector_backend="ssd",
+                        detector_backend=self.detector_backend,
                     )
 
                     if isinstance(result, dict):
@@ -58,7 +69,7 @@ class FaceRecognizer:
                         # Calculate cosine distance
                         dot_product = np.dot(self.reference_embedding, frame_embedding)
                         frame_norm = np.linalg.norm(frame_embedding)
-                        distance = 1 - (
+                        distance = 1.0 - (
                             dot_product / (self.reference_norm * frame_norm)
                         )
 
@@ -92,6 +103,10 @@ class FaceRecognizer:
                             print(
                                 f"Progress: {processed} frames | Matches found: {len(matches)}"
                             )
+
+                        if gui_root:
+                            gui_root.update()
+
                 except ValueError as e:
                     if "Face could not be detected" not in str(e):
                         if skipped == 0:

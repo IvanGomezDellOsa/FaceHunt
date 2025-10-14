@@ -265,7 +265,6 @@ class FaceHuntInputSelection:
     def start_extraction(self):
         """Start frame extraction with selected mode."""
         self.recognize_button.config(state="disabled")
-
         mode = self.mode_var.get()
 
         interval = self.frame_extractor.determine_interval(mode)
@@ -277,27 +276,40 @@ class FaceHuntInputSelection:
         self.root.update()
 
         success, result = self.frame_extractor.process_video()
-        self.frame_generator = result
 
         if success:
+            self.frame_generator = result
             self.step2_label.config(text="✅ Extract frames", fg="green")
+            self.root.update()
             self.start_recognition()
         else:
             messagebox.showerror("Error", result)
             return
 
     def start_recognition(self):
-        """Run face recognition on extracted frames and display results."""
+        """
+        Run face recognition on extracted frames and display results.
+
+        Selects detector backend based on processing mode:
+        - High Precision: Uses 'retinaface' for better accuracy
+        - Balanced: Uses 'mtcnn' for faster processing
+        """
         self.step3_label.config(text="🔵 Find matches", fg="orange")
         self.root.update()
 
         try:
-            recognizer = FaceRecognizer(self.reference_face_embedding)
+            mode = self.mode_var.get()
+            detector = "retinaface" if mode == "High Precision" else "mtcnn"
+
+            recognizer = FaceRecognizer(
+                self.reference_face_embedding, detector_backend=detector
+            )
             matches = recognizer.find_matches(
                 self.frame_generator,
                 threshold=0.32,
                 fps=self.frame_extractor.fps,
                 processable_frames=self.frame_extractor.total_processable_frames,
+                gui_root=self.root,
             )
         except Exception as e:
             messagebox.showerror("Error", f"Processing failed: {e}")
