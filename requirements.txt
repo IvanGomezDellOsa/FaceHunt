@@ -1,0 +1,7 @@
+opencv-python
+deepface
+yt-dlp
+unidecode
+numpy
+tensorflow
+tf-keras
