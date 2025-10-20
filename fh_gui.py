@@ -45,8 +45,6 @@ class FaceHuntInputSelection:
         self.recognize_button = None
 
         # UI components
-        self.progress = None
-        self.progress_bar = None
         self.progress_container = None
         self.mode_var = None
         self.mode_selector = None
@@ -191,20 +189,11 @@ class FaceHuntInputSelection:
         """Setup UI for YouTube video download."""
         self.root.title("FaceHunt - Video Download")
         tk.Label(self.root, text="Download YouTube video").pack(pady=5)
-        tk.Button(self.root, text="Start Download", command=self.start_download).pack(
-            pady=10
-        )
-        self.progress = tk.DoubleVar()
-        self.progress_bar = ttk.Progressbar(
-            self.root, variable=self.progress, maximum=100
-        )
-        self.progress_bar.pack(pady=5, fill="x", padx=10)
+        tk.Button(self.root, text="Start Download", command=self.start_download).pack(pady=10)
 
     def start_download(self):
         """Download YouTube video and proceed to frame extraction."""
-        downloader = VideoDownloader(
-            self.root, self.progress, self.youtube_url_to_download
-        )
+        downloader = VideoDownloader(self.youtube_url_to_download)
         self.video_path = downloader.download()
         if self.video_path:
             messagebox.showinfo(

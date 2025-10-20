@@ -5,7 +5,10 @@ import tempfile
 import shutil
 import numpy as np
 from deepface import DeepFace
-
+import traceback
+from fh_downloader import VideoDownloader
+from fh_face_recognizer import FaceRecognizer
+from fh_frame_extractor import VideoFrameExtractor
 
 class FaceHuntCore:
     """Handles core validation and processing logic for FaceHunt application."""
@@ -113,7 +116,7 @@ class FaceHuntCore:
             return (
                 True,
                 embedding,
-                f"Valid image with 1 face detected: {os.path.basename(file_path)}",
+                "Valid image with 1 face detected",
             )
 
         except ValueError:
@@ -150,15 +153,113 @@ class FaceHuntCore:
                 return False, None, "Invalid or unsupported video format."
 
         try:
-            with yt_dlp.YoutubeDL({"quiet": True, "noplaylist": True}) as ydl:
+            with yt_dlp.YoutubeDL({"quiet": True, "noplaylist": True, "extract_flat": False}) as ydl:
                 info = ydl.extract_info(source, download=False)
+
+            if not info or 'id' not in info or info.get('duration') is None or info['duration'] <= 0:
+                return False, None, "Invalid YouTube URL: Video not found or not accessible."
+
+            if not info.get('formats') or len(info['formats']) == 0:
+                return False, None, "Invalid YouTube URL: No video formats available."
+
             return (
                 True,
                 "youtube",
-                f"Valid YouTube URL:\n{info.get('title', 'Unknown')}",
+                f"Valid YouTube URL:\n{info.get('title', 'Unknown')} ({info.get('duration', 0)}s)",
             )
 
-        except yt_dlp.utils.DownloadError:
-            return False, None, "The path is not a valid local file or a YouTube URL."
+        except (yt_dlp.utils.DownloadError, yt_dlp.utils.ExtractorError, yt_dlp.utils.UnsupportedError) as e:
+            msg = str(e)
+            if "Invalid" in msg or "ERROR" in msg or "youtube:" in msg:
+                msg = "Invalid YouTube URL"
+            return False, None, msg
+
         except Exception as e:
             return False, None, f"An unexpected error occurred: {e}"
+
+    def execute_workflow(self, image_path, mode, video_source):
+        """
+        Executes the complete FaceHunt workflow in a headless environment.
+
+        This function orchestrates the entire process: validates the reference
+        image and video source, downloads the video if necessary, extracts
+        frames, and performs face recognition. It is designed to be called
+        from an API or a command-line interface, containing no GUI dependencies.
+
+        Args:
+            image_path (str): The file path to the reference image.
+            mode (str): The processing mode, either "balanced" or "precision".
+            video_source (str): The video source, which can be a local file path
+                                or a YouTube URL.
+
+        Returns:
+            dict: A dictionary containing the results of the process.
+                  {
+                      "success": bool,
+                      "message": str,
+                      "matches": list | None
+                  }
+        """
+        downloaded_video_path = None
+        try:
+            success, embedding, message = self.validate_image_file(image_path)
+            if not success:
+                return {"success": False, "message": message, "matches": None}
+
+            success, source_type, message = self.validate_video_source(video_source)
+            if not success:
+                return {"success": False, "message": message, "matches": None}
+
+            if source_type == "youtube":
+                print(f"Starting download from: {video_source}")
+                downloader = VideoDownloader(video_source)
+                video_path = downloader.download()
+
+                if video_path is None:
+                    return {"success": False, "message": "Could not download the YouTube video.", "matches": None}
+
+                downloaded_video_path = video_path
+            else:
+                video_path = video_source
+
+            extractor = VideoFrameExtractor(video_path)
+            success, msg = extractor.open_video()
+            if not success:
+                return {"success": False, "message": msg, "matches": None}
+
+            processing_mode = "High Precision" if mode == "precision" else "Balanced"
+            extractor.determine_interval(processing_mode)
+
+            success, frame_generator_or_error = extractor.process_video()
+            if not success:
+                return {"success": False, "message": frame_generator_or_error, "matches": None}
+
+            frame_generator = frame_generator_or_error
+
+            detector = "retinaface" if mode == "precision" else "mtcnn"
+            recognizer = FaceRecognizer(embedding, detector_backend=detector)
+            matches = recognizer.find_matches(
+                frame_generator,
+                threshold=0.32,
+                fps=extractor.fps,
+                processable_frames=extractor.total_processable_frames
+            )
+
+            return {
+                "success": True,
+                "message": f"Process completed. {len(matches)} matches found.",
+                "matches": matches
+            }
+
+        except Exception as e:
+            traceback.print_exc()
+            return {
+                "success": False,
+                "message": f"An unexpected internal error occurred: {str(e)}",
+                "matches": None
+            }
+
+        finally:
+            if downloaded_video_path and os.path.exists(downloaded_video_path):
+                print(f"Cleaning temporary file: {downloaded_video_path}")
+                os.remove(downloaded_video_path)
