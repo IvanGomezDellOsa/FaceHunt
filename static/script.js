@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "http://localhost:8000/api";
 
 // State
 let state = {

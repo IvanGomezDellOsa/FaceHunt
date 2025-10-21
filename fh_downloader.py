@@ -3,6 +3,7 @@ import shutil
 import yt_dlp
 from unidecode import unidecode
 
+
 class VideoDownloader:
     """Handles YouTube video download with validations."""
 
@@ -48,6 +49,9 @@ class VideoDownloader:
                 "outtmpl": os.path.join(self.output_dir, f"{clean_title}.%(ext)s"),
                 "noplaylist": True,
                 "quiet": True,
+                "http_headers": {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                },
             }
 
             print(f"[Downloader] Downloading: {self.youtube_url}")
