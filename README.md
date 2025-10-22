@@ -45,23 +45,18 @@ FaceHunt ahora incluye una interfaz web moderna además de la aplicación de esc
 ## Probar FaceHunt
 
 ### Opción 1: Ejecutar con Docker (Recomendado)
-Esta es la forma más rápida de probar la aplicación sin instalar nada más que Docker.
+Esta es la forma más rápida de probar la aplicación sin instalar nada más que Docker. Docker la descargará automáticamente desde Docker Hub.
 
-1. **Construye la imagen de Docker:**  
-   Desde la raíz de tu proyecto, ejecuta:  
+1. **Ejecuta el contenedor:**
+   Abre una terminal y ejecuta el siguiente comando:  
    ```bash
-   docker build -t facehunt-web .
+   docker run -it --rm -p 7860:7860 ivangomezdellosa/facehunt
    ```
 
-2. **Ejecuta el contenedor:**  
-   ```bash
-   docker run -it --rm -p 8000:8000 facehunt-web
-   ```
-
-3. **Abre la aplicación:**  
+2. **Abre la aplicación:**  
    Ve a tu navegador y abre la siguiente dirección:  
    ```
-   http://localhost:8000
+   http://localhost:7860
    ```
 
 ### Opción 2: Ejecutar Localmente
@@ -99,12 +94,12 @@ Esta opción es ideal para desarrolladores que quieran explorar el código fuent
 5. **Abre la aplicación:**  
    Ve a tu navegador y abre la siguiente dirección:  
    ```
-   http://localhost:8000
+   http://localhost:7860
    ```
 
 ---
 
-**Nota para desarrolladores:** La documentación de la API estará disponible automáticamente en `http://localhost:8000/docs`.
+**Nota para desarrolladores:** La documentación de la API estará disponible automáticamente en `http://localhost:7860/docs`.
 
 
 <details>
