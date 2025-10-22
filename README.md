@@ -34,6 +34,14 @@ FaceHunt ahora incluye una interfaz web moderna además de la aplicación de esc
     - Construida con `Tkinter`.
 
 
+#### Uso:
+
+1. **Paso 1:** Sube una imagen de referencia (debe contener exactamente una cara)
+2. **Paso 2:** Selecciona un video (archivo local o URL de YouTube)
+3. **Paso 3:** Elige el modo de procesamiento (Equilibrado o Alta Precisión)
+4. **Paso 4:** Revisa los resultados. Si hay coincidencias muestra timestamps de los momentos exactos donde aparece la cara de referencia en el video. 
+
+
 ## Probar FaceHunt
 
 ### Opción 1: Ejecutar con Docker (Recomendado)
@@ -98,6 +106,7 @@ Esta opción es ideal para desarrolladores que quieran explorar el código fuent
 
 **Nota para desarrolladores:** La documentación de la API estará disponible automáticamente en `http://localhost:8000/docs`.
 
+
 <details>
 <summary>🗄️ Instrucciones para la GUI de Escritorio (Tkinter)</summary>
 
@@ -117,15 +126,9 @@ python main.py
 
 </details>
 
-#### Flujo de trabajo:
 
-1. **Paso 1:** Sube una imagen de referencia (debe contener exactamente una cara)
-2. **Paso 2:** Selecciona un video (archivo local o URL de YouTube)
-3. **Paso 3:** Elige el modo de procesamiento (Equilibrado o Alta Precisión)
-4. **Paso 4:** Revisa los resultados. Si hay coincidencias muestra timestamps de los momentos exactos donde aparece la cara de referencia en el video. 
-
-
-### Módulos Principales
+<details>
+<summary>🏛️ Arquitectura y Módulos Principales</summary>
 
 #### `fh_core.py`
 - **Propósito:** Coordina el flujo completo de procesamiento
@@ -157,16 +160,17 @@ python main.py
   - MTCNN (equilibrado)
   - OpenCV (rápido, baja precisión)
 
+</details>
 
 ### 🧾 Aclaración de Responsabilidades
 
-Con el fin de dejar claras las responsabilidades de cada parte (y no atribuirme tareas que no realicé), este proyecto fue desarrollado principalmente de forma manual, con el objetivo de garantizar un producto robusto y técnicamente sólido. La inteligencia artificial se utilizó únicamente como herramienta de apoyo en tareas puntuales, sin intervenir en la lógica central ni en la arquitectura del software.
+El objetivo de este proyecto fue demostrar habilidades en **Python**, abarcando arquitectura de software, procesamiento de video, integración de modelos con Machine Learning y optimización de recursos.  
+Por transparencia, aclaro en qué partes intervino la inteligencia artificial y en cuáles no. Fue utilizada con un propósito definido como herramienta de apoyo, y no como protagonista ni orquestadora del desarrollo.
 
-- **Python:** Desarrollo completamente propio. Con un enfoque minucioso en la optimización, simplificación y limpieza del código, eliminando redundancias y asegurando un flujo coherente entre módulos.  
-- **Docstrings y README:** Fueron redactados y formateados inicialmente por IA para darles estructura y estética profesional. Posteriormente los modifiqué manualmente en múltiples ocasiones para ajustar detalles técnicos, mejorar la precisión y reflejar fielmente el estado real del proyecto.  
-- **HTML, CSS y JavaScript:** No fueron desarrollados por mí, ya que el objetivo de este proyecto fue demostrar habilidades técnicas en **Python** y **lógica de procesamiento**, no en diseño o front-end. La base fue generada por IA (v0) para agilizar la entrega del MVP, y mi participación se limitó a modificar descripciones, nombres de secciones y mensajes al usuario.  
-- **FastAPI:** Todo el desarrollo de la API fue realizado manualmente por mí. La IA solo se utilizó para sugerir correcciones de sintaxis, pero **no intervino en la lógica ni en la arquitectura del software**. Al adaptar el proyecto de la versión Tkinter a la web, fue necesario **rediseñar completamente el flujo del programa** para que la API funcione correctamente y no interfiera con otros módulos, asegurando eficiencia, claridad y cumplimiento de responsabilidades dentro del flujo de la aplicación.
-
+- **Lógica (Python):** Desarrollo completamente propio. Con un enfoque minucioso en la optimización, simplificación y limpieza del código, eliminando redundancias, corrigiendo validaciones fallidas, mejorando los tiempos de ejecución y asegurando un flujo coherente entre módulos.  
+- **Frontend (HTML/CSS/JS)** Aunque tengo experiencia en estas tecnologías, este componente no era el foco del desafío. Decidí delegar el diseño web a una IA (v0), reconociendo que podía generar una interfaz limpia y más estética en menos tiempo. Esto me permitió no desviar el objetivo del proyecto y centrarme 100% en el backend.  
+- **Arquitectura de la API (FastAPI):** Como estoy en proceso de aprendizaje de FastAPI, utilicé la IA para generar la sintaxis básica. Mi trabajo se centró en el diseño de la arquitectura lógica. Esto implicó rechazar activamente las arquitecturas ineficientes propuestas por la IA (que duplicaban código, dividían responsabilidades y sacrificaban la optimización) y, en su lugar, diseñar e implementar un flujo de datos limpio y completamente optimizado. Este rediseño fue fundamental para asegurar que la API se comunique eficientemente con el núcleo de Python.
+- **Documentación (README y Docstrings):** La redacción fue realizada casi en su totalidad por IA. Posteriormente, el contenido fue editado y refinado manualmente por mí para garantizar la precisión técnica y reflejar fielmente las decisiones de arquitectura tomadas.  
 
 ## 👤 Autor
 
