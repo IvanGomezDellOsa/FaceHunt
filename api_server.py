@@ -27,7 +27,7 @@ app.add_middleware(
 api_router = APIRouter(prefix="/api")
 
 
-@api_router.get("/healthz")
+@app.get("/healthz")
 async def health_check():
     return {"status": "healthy"}
 
