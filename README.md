@@ -15,7 +15,7 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
       alt="Click para probar FaceHunt Web" 
       src="https://img.shields.io/badge/%F0%9F%91%89_CLICK_PARA_PROBAR_FACEHUNT_WEB-0066ff?style=for-the-badge" 
       height="100"
-      width="300"
+      width="350"
     >
   </a>
 </p>
