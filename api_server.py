@@ -1,11 +1,12 @@
 import os
-import shutil
-import tempfile
-from typing import Optional
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+import shutil
+import tempfile
+from typing import Optional
 
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse
