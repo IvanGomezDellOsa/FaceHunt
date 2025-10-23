@@ -11,13 +11,12 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
 
 <p align="center">
   <a href="https://huggingface.co/spaces/IvanGomezDellOsa/FaceHunt" target="_blank">
-    <svg width="500" height="80" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto;">
-      <rect width="500" height="80" rx="16" fill="#0066ff"/>
-      <text x="250" y="44" dominant-baseline="middle" text-anchor="middle" 
-            fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="600">
-        Click para probar FaceHunt Web
-      </text>
-    </svg>
+    <img 
+      alt="Click para probar FaceHunt Web" 
+      src="https://img.shields.io/badge/%F0%9F%91%89_CLICK_PARA_PROBAR_FACEHUNT_WEB-0066ff?style=for-the-badge" 
+      height="100"
+      width="400"
+    >
   </a>
 </p>
 
