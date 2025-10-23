@@ -10,11 +10,10 @@ FaceHunt ahora incluye una interfaz web moderna además de la aplicación de esc
 La versión web es ideal para probar FaceHunt como demo, ya que no requiere instalación ni configuración local. Sin embargo, al ejecutarse en servidores públicos, los tiempos de procesamiento son mayores en comparación con la versión local.
 
 <p align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" width="300" height="50" viewBox="0 0 300 50">
-    <rect width="300" height="50" rx="10" fill="#0078ff"/>
-    <text x="50%" y="50%" text-anchor="middle" alignment-baseline="central"
-          font-family="Arial, sans-serif" font-size="16" fill="white">👉 Click para probar FaceHunt Web</text>
-  </svg>
+  <a href="https://huggingface.co/spaces/IvanGomezDellOsa/FaceHunt" target="_blank">
+    <img src="https://raw.githubusercontent.com/IvanGomezDellOsa/assets/main/facehunt_web_button.svg" 
+         alt="👉 Click para probar FaceHunt Web" width="280">
+  </a>
 </p>
 
 
