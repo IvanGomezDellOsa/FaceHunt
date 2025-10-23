@@ -141,4 +141,4 @@ if __name__ == "__main__":
     print("🚀 Starting FaceHunt Server (API + Frontend)...")
     print("Access the application at: http://127.0.0.1:8000")
     print("Access the API docs at:  http://127.0.0.1:8000/docs")
-    uvicorn.run("api_server:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("api_server:app", host="0.0.0.0", port=port, reload=False)
