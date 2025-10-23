@@ -4,6 +4,7 @@ LABEL maintainer="IvanGomezDellOsa <ivangomezdellosa@gmail.com>"
 ENV CUDA_VISIBLE_DEVICES="-1"
 ENV TF_CPP_MIN_LOG_LEVEL="2"
 ENV TF_ENABLE_ONEDNN_OPTS="0"
+ENV TF_FORCE_GPU_ALLOW_GROWTH="false"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 \

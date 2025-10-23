@@ -1,4 +1,9 @@
 import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 import cv2
 import yt_dlp
 import tempfile
@@ -9,6 +14,7 @@ import traceback
 from fh_downloader import VideoDownloader
 from fh_face_recognizer import FaceRecognizer
 from fh_frame_extractor import VideoFrameExtractor
+
 
 class FaceHuntCore:
     """Handles core validation and processing logic for FaceHunt application."""
@@ -153,13 +159,24 @@ class FaceHuntCore:
                 return False, None, "Invalid or unsupported video format."
 
         try:
-            with yt_dlp.YoutubeDL({"quiet": True, "noplaylist": True, "extract_flat": False}) as ydl:
+            with yt_dlp.YoutubeDL(
+                {"quiet": True, "noplaylist": True, "extract_flat": False}
+            ) as ydl:
                 info = ydl.extract_info(source, download=False)
 
-            if not info or 'id' not in info or info.get('duration') is None or info['duration'] <= 0:
-                return False, None, "Invalid YouTube URL: Video not found or not accessible."
+            if (
+                not info
+                or "id" not in info
+                or info.get("duration") is None
+                or info["duration"] <= 0
+            ):
+                return (
+                    False,
+                    None,
+                    "Invalid YouTube URL: Video not found or not accessible.",
+                )
 
-            if not info.get('formats') or len(info['formats']) == 0:
+            if not info.get("formats") or len(info["formats"]) == 0:
                 return False, None, "Invalid YouTube URL: No video formats available."
 
             return (
@@ -168,7 +185,11 @@ class FaceHuntCore:
                 f"Valid YouTube URL:\n{info.get('title', 'Unknown')} ({info.get('duration', 0)}s)",
             )
 
-        except (yt_dlp.utils.DownloadError, yt_dlp.utils.ExtractorError, yt_dlp.utils.UnsupportedError) as e:
+        except (
+            yt_dlp.utils.DownloadError,
+            yt_dlp.utils.ExtractorError,
+            yt_dlp.utils.UnsupportedError,
+        ) as e:
             msg = str(e)
             if "Invalid" in msg or "ERROR" in msg or "youtube:" in msg:
                 msg = "Invalid YouTube URL"
@@ -216,7 +237,11 @@ class FaceHuntCore:
                 video_path = downloader.download()
 
                 if video_path is None:
-                    return {"success": False, "message": "Could not download the YouTube video.", "matches": None}
+                    return {
+                        "success": False,
+                        "message": "Could not download the YouTube video.",
+                        "matches": None,
+                    }
 
                 downloaded_video_path = video_path
             else:
@@ -232,7 +257,11 @@ class FaceHuntCore:
 
             success, frame_generator_or_error = extractor.process_video()
             if not success:
-                return {"success": False, "message": frame_generator_or_error, "matches": None}
+                return {
+                    "success": False,
+                    "message": frame_generator_or_error,
+                    "matches": None,
+                }
 
             frame_generator = frame_generator_or_error
 
@@ -242,13 +271,13 @@ class FaceHuntCore:
                 frame_generator,
                 threshold=0.32,
                 fps=extractor.fps,
-                processable_frames=extractor.total_processable_frames
+                processable_frames=extractor.total_processable_frames,
             )
 
             return {
                 "success": True,
                 "message": f"Process completed. {len(matches)} matches found.",
-                "matches": matches
+                "matches": matches,
             }
 
         except Exception as e:
@@ -256,7 +285,7 @@ class FaceHuntCore:
             return {
                 "success": False,
                 "message": f"An unexpected internal error occurred: {str(e)}",
-                "matches": None
+                "matches": None,
             }
 
         finally:
