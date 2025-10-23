@@ -1,8 +1,8 @@
-.venv
+.venv/
 __pycache__/
 *.pyc
 .git/
-.idea
+.idea/
 # Unused desktop GUI files
 main.py
 fh_gui.py
