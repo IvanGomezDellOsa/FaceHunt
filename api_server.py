@@ -27,6 +27,11 @@ app.add_middleware(
 api_router = APIRouter(prefix="/api")
 
 
+@api_router.get("/healthz")
+async def health_check():
+    return {"status": "healthy"}
+
+
 @api_router.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
     temp_path = None
