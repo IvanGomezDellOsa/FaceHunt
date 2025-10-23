@@ -20,11 +20,7 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
   </a>
 </p>
 
-
-
-
-
-
+<br><br><br>
 
 ## ✨ Características
 
