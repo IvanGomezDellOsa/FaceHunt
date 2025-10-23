@@ -6,7 +6,13 @@ FaceHunt es una herramienta de análisis de video basada en deep learning que id
 ## Estado del Proyecto
 
 FaceHunt ahora incluye una interfaz web moderna además de la aplicación de escritorio original. Ambas versiones están completamente funcionales.
+La versión web es ideal para probar FaceHunt como demo, ya que no requiere instalación ni configuración local. Sin embargo, al ejecutarse en servidores públicos, los tiempos de procesamiento son mayores en comparación con la versión local.
 
+<p align="center">
+  <a href="https://huggingface.co/spaces/IvanGomezDellOsa/FaceHunt" target="_blank">
+    <img src="https://img.shields.io/badge/👉%20Click%20para%20probar%20FaceHunt%20Web-%230066FF?style=for-the-badge&logo=huggingface&logoColor=white" alt="Probar FaceHunt Web"/>
+  </a>
+</p>
 
 ## ✨ Características
 
