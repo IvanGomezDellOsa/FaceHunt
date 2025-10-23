@@ -22,4 +22,4 @@ RUN mkdir -p videos
 
 EXPOSE 7860
 
-CMD ["uvicorn", "api_server:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["python", "api_server.py"]

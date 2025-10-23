@@ -135,7 +135,8 @@ def save_temp_file(file: UploadFile) -> str:
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 7860))
     print("🚀 Starting FaceHunt Server (API + Frontend)...")
     print("Access the application at: http://127.0.0.1:8000")
     print("Access the API docs at:  http://127.0.0.1:8000/docs")
-    uvicorn.run("api_server:app", host="0.0.0.0", port=7860, reload=True)
+    uvicorn.run("api_server:app", host="0.0.0.0", port=port, reload=True)
