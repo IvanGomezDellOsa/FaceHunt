@@ -14,7 +14,7 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
     <img 
       alt="Click para probar FaceHunt Web" 
       src="https://img.shields.io/badge/%F0%9F%91%89_CLICK_PARA_PROBAR_FACEHUNT_WEB-0066ff?style=for-the-badge" 
-      height="50"
+      height="100"
     >
   </a>
 </p>
@@ -55,6 +55,16 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
 
 
 ## Probar FaceHunt
+
+<p align="center">
+  <a href="https://huggingface.co/spaces/IvanGomezDellOsa/FaceHunt" target="_blank">
+    <img 
+      alt="Click para probar FaceHunt Web" 
+      src="https://img.shields.io/badge/%F0%9F%91%89_CLICK_PARA_PROBAR_FACEHUNT_WEB-0066ff?style=for-the-badge" 
+      height="100"
+    >
+  </a>
+</p>
 
 ### Opción 1: Ejecutar con Docker (Recomendado)
 Esta es la forma más rápida de probar la aplicación sin instalar nada más que Docker. Docker la descargará automáticamente desde Docker Hub.
