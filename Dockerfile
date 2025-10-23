@@ -28,4 +28,4 @@ RUN python -c "from deepface import DeepFace; DeepFace.build_model('Facenet'); D
 
 EXPOSE 7860
 
-CMD ["python", "api_server.py"]
+CMD uvicorn api_server:app --host 0.0.0.0 --port ${PORT:-7860}
