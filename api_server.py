@@ -118,10 +118,9 @@ async def recognize_faces(
 app.include_router(api_router)
 
 
-@app.get("/", include_in_schema=False)
-@app.head("/", include_in_schema=False)
+@app.get("/")
 async def root():
-    return FileResponse("static/index.html")
+   return FileResponse("static/index.html")
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

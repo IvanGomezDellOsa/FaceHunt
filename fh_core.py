@@ -1,9 +1,4 @@
 import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 import cv2
 import yt_dlp
 import tempfile
