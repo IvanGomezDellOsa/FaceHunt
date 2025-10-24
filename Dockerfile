@@ -24,7 +24,7 @@ COPY . .
 
 RUN mkdir -p videos
 
-RUN python -c "from deepface import DeepFace; DeepFace.build_model('Facenet'); DeepFace.build_model('Retinaface')" || true
+RUN python -c "from deepface import DeepFace; DeepFace.build_model('Facenet'); DeepFace.build_model('mtcnn')" || true
 
 EXPOSE 7860
 

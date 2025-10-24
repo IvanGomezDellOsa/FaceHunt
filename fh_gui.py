@@ -288,7 +288,7 @@ class FaceHuntInputSelection:
 
         try:
             mode = self.mode_var.get()
-            detector = "retinaface" if mode == "High Precision" else "mtcnn"
+            detector = "mtcnn" if mode == "High Precision" else "mtcnn"
 
             recognizer = FaceRecognizer(
                 self.reference_face_embedding, detector_backend=detector

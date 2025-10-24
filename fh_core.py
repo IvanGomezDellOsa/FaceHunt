@@ -92,7 +92,7 @@ class FaceHuntCore:
                 img_path=temp_path,
                 model_name="Facenet",
                 enforce_detection=True,
-                detector_backend="retinaface",
+                detector_backend="mtcnn",
             )
 
             if len(result) == 0:
@@ -260,7 +260,7 @@ class FaceHuntCore:
 
             frame_generator = frame_generator_or_error
 
-            detector = "retinaface" if mode == "precision" else "mtcnn"
+            detector = "mtcnn" if mode == "precision" else "mtcnn"
             recognizer = FaceRecognizer(embedding, detector_backend=detector)
             matches = recognizer.find_matches(
                 frame_generator,
