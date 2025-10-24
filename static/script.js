@@ -97,7 +97,7 @@ imageInput.addEventListener("change", (e) => {
 
 function handleImageUpload(file) {
     state.referenceImage = file;
-    state.imageValidated = false; // <-- Se resetea al cambiar la imagen
+    state.imageValidated = false;
     const reader = new FileReader();
     reader.onload = (e) => {
         imagePreviewImg.src = e.target.result;
@@ -238,7 +238,21 @@ validateVideoBtn.addEventListener("click", async () => {
             setTimeout(() => updateStepUI(3), 1000);
         } else {
             state.videoValidated = false;
-            showValidationMessage(videoValidation, data.detail, "error");
+            if (data.detail && data.detail.error_type === 'YOUTUBE_UNSUPPORTED') {
+                const errorWithLink = `
+                    <strong>Alternative solution:</strong><br>
+                    YouTube's anti-bot system prevents direct downloads from free servers.
+                    You can download the video manually from: 
+                    <a href="https://savefrom.net/" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">SaveFrom</a> 
+                    and then upload it as a local file.
+                `;
+                videoValidation.innerHTML = errorWithLink;
+                videoValidation.className = 'validation-message info';
+                videoValidation.classList.remove('hidden');
+            } else {
+                const errorMessage = (typeof data.detail === 'string') ? data.detail : data.detail.message;
+                showValidationMessage(videoValidation, data.detail, "error");
+            }
         }
     } catch (error) {
         state.videoValidated = false;
@@ -346,4 +360,7 @@ startNewSearchBtn.addEventListener("click", () => {
 });
 
 retryBtn.addEventListener("click", () => { updateStepUI(3); });
-updateStepUI(1);
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateStepUI(1);
+});
