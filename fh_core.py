@@ -264,7 +264,7 @@ class FaceHuntCore:
             recognizer = FaceRecognizer(embedding, detector_backend=detector)
             matches = recognizer.find_matches(
                 frame_generator,
-                threshold=0.32,
+                threshold=0.40,
                 fps=extractor.fps,
                 processable_frames=extractor.total_processable_frames,
             )

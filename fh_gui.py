@@ -295,7 +295,7 @@ class FaceHuntInputSelection:
             )
             matches = recognizer.find_matches(
                 self.frame_generator,
-                threshold=0.32,
+                threshold=0.40,
                 fps=self.frame_extractor.fps,
                 processable_frames=self.frame_extractor.total_processable_frames,
                 gui_root=self.root,

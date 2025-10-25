@@ -23,7 +23,7 @@ class FaceRecognizer:
     def find_matches(
         self,
         frame_generator,
-        threshold=0.32,
+        threshold=0.40,
         fps=30,
         processable_frames=0,
         gui_root=None,
