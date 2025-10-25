@@ -189,7 +189,9 @@ class FaceHuntInputSelection:
         """Setup UI for YouTube video download."""
         self.root.title("FaceHunt - Video Download")
         tk.Label(self.root, text="Download YouTube video").pack(pady=5)
-        tk.Button(self.root, text="Start Download", command=self.start_download).pack(pady=10)
+        tk.Button(self.root, text="Start Download", command=self.start_download).pack(
+            pady=10
+        )
 
     def start_download(self):
         """Download YouTube video and proceed to frame extraction."""
@@ -281,21 +283,21 @@ class FaceHuntInputSelection:
 
         Selects detector backend based on processing mode:
         - High Precision: Uses 'retinaface' for better accuracy
-        - Balanced: Uses 'mtcnn' for faster processing
+        - Balanced: Uses 'ssd' for faster processing
         """
         self.step3_label.config(text="🔵 Find matches", fg="orange")
         self.root.update()
 
         try:
             mode = self.mode_var.get()
-            detector = "mtcnn" if mode == "High Precision" else "mtcnn"
+            detector = "ssd" if mode == "High Precision" else "ssd"
 
             recognizer = FaceRecognizer(
                 self.reference_face_embedding, detector_backend=detector
             )
             matches = recognizer.find_matches(
                 self.frame_generator,
-                threshold=0.40,
+                threshold=0.35,
                 fps=self.frame_extractor.fps,
                 processable_frames=self.frame_extractor.total_processable_frames,
                 gui_root=self.root,

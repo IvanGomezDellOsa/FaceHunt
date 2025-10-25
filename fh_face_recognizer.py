@@ -5,14 +5,14 @@ import numpy as np
 class FaceRecognizer:
     """Performs face recognition on video frames using FaceNet embeddings."""
 
-    def __init__(self, reference_embedding, detector_backend="mtcnn"):
+    def __init__(self, reference_embedding, detector_backend="ssd"):
         """
         Initialize face recognizer with reference embedding.
         Args:
             reference_embedding: FaceNet embedding from reference image
             detector_backend: Face detector to use. Options:
                 - 'opencv': Fast, less accurate (default)
-                - 'mtcnn': Good accuracy, slower
+                - 'ssd': Good accuracy, slower
                 - 'retinaface': Best accuracy, slowest
         """
         self.reference_embedding = np.array(reference_embedding)
@@ -23,7 +23,7 @@ class FaceRecognizer:
     def find_matches(
         self,
         frame_generator,
-        threshold=0.40,
+        threshold=0.35,
         fps=30,
         processable_frames=0,
         gui_root=None,

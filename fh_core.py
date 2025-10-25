@@ -92,7 +92,7 @@ class FaceHuntCore:
                 img_path=temp_path,
                 model_name="Facenet",
                 enforce_detection=True,
-                detector_backend="mtcnn",
+                detector_backend="ssd",
             )
 
             if len(result) == 0:
@@ -260,11 +260,11 @@ class FaceHuntCore:
 
             frame_generator = frame_generator_or_error
 
-            detector = "mtcnn" if mode == "precision" else "mtcnn"
+            detector = "ssd" if mode == "precision" else "ssd"
             recognizer = FaceRecognizer(embedding, detector_backend=detector)
             matches = recognizer.find_matches(
                 frame_generator,
-                threshold=0.40,
+                threshold=0.35,
                 fps=extractor.fps,
                 processable_frames=extractor.total_processable_frames,
             )
