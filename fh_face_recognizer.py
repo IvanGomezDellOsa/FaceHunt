@@ -5,14 +5,14 @@ import numpy as np
 class FaceRecognizer:
     """Performs face recognition on video frames using FaceNet embeddings."""
 
-    def __init__(self, reference_embedding, detector_backend="ssd"):
+    def __init__(self, reference_embedding, detector_backend="mtcnn"):
         """
         Initialize face recognizer with reference embedding.
         Args:
             reference_embedding: FaceNet embedding from reference image
             detector_backend: Face detector to use. Options:
                 - 'opencv': Fast, less accurate (default)
-                - 'ssd': Good accuracy, slower
+                - 'mtcnn': Good accuracy, slower
                 - 'retinaface': Best accuracy, slowest
         """
         self.reference_embedding = np.array(reference_embedding)
@@ -66,9 +66,10 @@ class FaceRecognizer:
 
                     for face_data in result:
                         frame_embedding = np.array(face_data["embedding"])
-                        # Calculate cosine distance
                         dot_product = np.dot(self.reference_embedding, frame_embedding)
-                        frame_norm = np.linalg.norm(frame_embedding)
+                        frame_norm = np.linalg.norm(
+                            frame_embedding
+                        )  # Calculate cosine distance
                         distance = 1.0 - (
                             dot_product / (self.reference_norm * frame_norm)
                         )

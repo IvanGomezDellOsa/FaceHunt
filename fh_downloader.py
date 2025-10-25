@@ -88,7 +88,6 @@ class VideoDownloader:
                 return None
 
             if os.path.exists(video_file):
-                self._cleanup_cookies()
                 return video_file
 
             ydl_opts = {

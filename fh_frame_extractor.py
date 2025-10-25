@@ -59,20 +59,21 @@ class VideoFrameExtractor:
 
     def determine_interval(self, mode="Balanced"):
         """
-        Calculate frame sampling interval based on mode.
+        Calculate frame sampling interval.
+
+        Both "High Precision" and "Balanced" modes use a fixed interval of 1 frame per second.
+        Precision is achieved through detector quality and threshold, not frame density.
 
         Args:
-            mode: "High Precision" (0.25s) or "Balanced" (0.5s)
+            mode (str): Processing mode. Currently ignored (kept for future extensibility).
+                        Options: "High Precision", "Balanced".
 
         Returns:
-            int: Frame interval (number of frames to skip)
+            int: Frame interval (number of frames to skip between samples).
+                 Guaranteed to be at least 1.
         """
-        if mode == "High Precision":
-            seconds_per_sample = 0.35  # 1 frame every 0.35s
-        else:  # Mode = Balanced
-            seconds_per_sample = 0.8  # 1 frame every 0.8s
-
-        self.frame_interval = int(self.fps * seconds_per_sample)
+        seconds_per_sample = 1.0
+        self.frame_interval = max(1, int(self.fps * seconds_per_sample))
 
         return self.frame_interval
 

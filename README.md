@@ -36,10 +36,10 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
 - ⚡ **Dos Modos de Procesamiento**
     - Permite al usuario elegir el balance perfecto entre velocidad y exactitud para cada análisis.
         - **Alta Precisión:** Usa el detector `RetinaFace` para máxima calidad.
-        - **Equilibrado:** Usa el detector `ssd` para un análisis más rápido (igualmente extremadamente preciso).
+        - **Equilibrado:** Usa el detector `mtcnn` para un análisis más rápido (igualmente extremadamente preciso).
 
 - 🔍 **Múltiples Backends de Detección**
-    - Soporte para `RetinaFace`, `ssd` y `OpenCV`.
+    - Soporte para `RetinaFace`, `mtcnn` y `OpenCV`.
 
 - 🛰️ **API RESTful Robusta**
     - Un backend impulsado por `FastAPI` que expone toda la lógica de negocio de forma segura y eficiente.    
@@ -168,7 +168,7 @@ python main.py
 - **Propósito:** Extrae frames del video
 - **Modos:**
   - Alta Precisión: 1 frame cada 0.25s (RetinaFace)
-  - Equilibrado: 1 frame cada 0.5s (ssd)
+  - Equilibrado: 1 frame cada 0.5s (mtcnn)
 - **Optimización:** Generador de frames por lotes para reducir uso de memoria en videos largos.
 
 #### `fh_face_recognizer.py`
@@ -177,7 +177,7 @@ python main.py
 - **Métrica:** Distancia coseno (match si ≤ 0.32)
 - **Detectores disponibles:**
   - RetinaFace (alta precisión, lento)
-  - ssd (equilibrado)
+  - mtcnn (equilibrado)
   - OpenCV (rápido, baja precisión)
 
 </details>

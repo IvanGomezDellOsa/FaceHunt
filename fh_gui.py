@@ -283,14 +283,14 @@ class FaceHuntInputSelection:
 
         Selects detector backend based on processing mode:
         - High Precision: Uses 'retinaface' for better accuracy
-        - Balanced: Uses 'ssd' for faster processing
+        - Balanced: Uses 'mtcnn' for faster processing
         """
         self.step3_label.config(text="🔵 Find matches", fg="orange")
         self.root.update()
 
         try:
             mode = self.mode_var.get()
-            detector = "ssd" if mode == "High Precision" else "ssd"
+            detector = "retinaface" if mode == "High Precision" else "mtcnn"
 
             recognizer = FaceRecognizer(
                 self.reference_face_embedding, detector_backend=detector
