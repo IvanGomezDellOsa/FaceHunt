@@ -1,5 +1,5 @@
 # Deep Learning & Face Recognition
-tensorflow-cpu==2.18.0
+tensorflow-cpu>=2.18.0
 deepface>=0.0.88
 numpy>=1.26.4
 tf-keras>=2.18.0
