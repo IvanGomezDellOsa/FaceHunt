@@ -27,8 +27,8 @@ class FaceHuntCore:
         if not os.path.exists(file_path):
             return False, None, "The image does not exist."
 
-        if not file_path.lower().endswith((".jpg", ".png", ".webp")):
-            return False, None, "Only JPG, PNG, or WebP files are accepted."
+        if not file_path.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+            return False, None, "Only JPG, PNG, JPEG or WebP files are accepted."
 
         return self._extract_face_embedding(file_path)
 

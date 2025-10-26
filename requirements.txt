@@ -6,10 +6,10 @@ tf-keras>=2.18.0
 Pillow>=10.4.0
 
 # Video Processing
-opencv-python>=4.10.0
+opencv-python>=4.8.1.78
 yt-dlp>=2024.10.07
 
-# Web Framework (para API)
+# Web Framework
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 python-multipart>=0.0.9

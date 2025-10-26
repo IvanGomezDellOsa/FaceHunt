@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .git/
 .idea/
+assets/
 # Unused desktop GUI files
 main.py
 fh_gui.py

@@ -72,6 +72,16 @@ async def validate_video(
         )
 
         if not success:
+            is_youtube = source and ("youtube.com" in source or "youtu.be" in source)
+            if is_youtube and source:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error_type": "YOUTUBE_DOWNLOAD_FAILED",
+                        "message": message,
+                        "original_url": source,
+                    },
+                )
             raise HTTPException(status_code=400, detail=message)
         return {"message": message, "source_type": source_type}
     finally:
@@ -104,6 +114,18 @@ async def recognize_faces(
         )
 
         if not result["success"]:
+            is_youtube = video_url and (
+                "youtube.com" in video_url or "youtu.be" in video_url
+            )
+            if is_youtube:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error_type": "YOUTUBE_DOWNLOAD_FAILED",
+                        "message": result["message"],
+                        "original_url": video_url,
+                    },
+                )
             raise HTTPException(status_code=400, detail=result["message"])
         return result
     except Exception as e:
@@ -120,7 +142,7 @@ app.include_router(api_router)
 
 @app.get("/")
 async def root():
-   return FileResponse("static/index.html")
+    return FileResponse("static/index.html")
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
