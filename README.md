@@ -49,9 +49,6 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
 
 
 #### Uso:
-<p align="center">
-  <img alt="FaceHunt Workflow Demo Gift" src="https://raw.githubusercontent.com/IvanGomezDellOsa/FaceHunt/main/assets/wf_gift.webp" width="800">
-</p>
 
 1. **Paso 1:** Sube una imagen de referencia (debe contener exactamente una cara)
     <p align="center">
