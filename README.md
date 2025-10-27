@@ -51,36 +51,36 @@ La versión web es ideal para probar FaceHunt como demo, ya que no requiere inst
 #### Uso:
 
 1. **Paso 1:** Sube una imagen de referencia (debe contener exactamente una cara)
-   <p align="center">
-     ![Paso 1 - Subir Imagen de Referencia](https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_0.webp)
-   </p>
-   <p align="center">
-     ![Paso 1 - Subir Imagen de Referencia](https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_1.webp)
-   </p>
+<p align="center">
+  <img alt="Paso 1 - Subir Imagen de Referencia" src="https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_0.webp" width="650" />
+</p>
+<p align="center">
+  <img alt="Paso 1 - Subir Imagen de Referencia" src="https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_1.webp" width="650" />
+</p>
 
 ---
 
 2. **Paso 2:** Selecciona un video (archivo local o URL de YouTube)
-   <p align="center">
-     ![Paso 2 - Seleccionar Fuente de Video](https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_2.webp)
-   </p>
+<p align="center">
+  <img alt="Paso 2 - Seleccionar Fuente de Video" src="https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_2.webp" width="650" />
+</p>
 
 ---
 
 3. **Paso 3:** Elige el modo de procesamiento (Equilibrado o Alta Precisión)
-   <p align="center">
-     ![Paso 3 - Elegir Modo de Procesamiento](https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_3.webp)
-   </p>
+<p align="center">
+  <img alt="Paso 3 - Elegir Modo de Procesamiento" src="https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_3.webp" width="650" />
+</p>
 
 ---
 
-4. **Paso 4:** Revisa los resultados. Si hay coincidencias muestra timestamps...
-   <p align="center">
-     ![Paso 4 - Procesando](https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_4.webp)
-   </p>
-   <p align="center">
-     ![Paso 4 - Procesando](https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_5.webp)
-   </p>
+4. **Paso 4:** Revisa los resultados. Si hay coincidencias muestra timestamps de los momentos exactos donde aparece la cara de referencia en el video. 
+<p align="center">
+  <img alt="Paso 4 - Procesando" src="https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_4.webp" width="650" />
+</p>
+<p align="center">
+  <img alt="Paso 4 - Procesando" src="https://cdn.jsdelivr.net/gh/IvanGomezDellOsa/FaceHunt@a7a5a2ff8fa0e41c1923414a6b9c13ec63bebd9d/assets/wf_5.webp" width="650" />
+</p>
 
 
 ## Probar FaceHunt
