@@ -223,7 +223,7 @@ Por transparencia, aclaro en qué partes intervino la inteligencia artificial y 
 
 **Iván Gómez Dell'Osa**
 
-- GitHub: https://github.com/IvanGomezDellOsa/FaceHunt
+- GitHub: https://github.com/IvanGomezDellOsa
 - Email: ivangomezdellosa@gmail.com
 - Linkedin: https://www.linkedin.com/in/ivangomezdellosa/
 ---
