@@ -4,6 +4,8 @@
 
 FaceHunt es una herramienta de análisis de video basada en deep learning que identifica todas las apariciones de una persona. Solo necesitas subir una foto de referencia y un video (local o de YouTube) para obtener una lista precisa de los momentos exactos en que aparece la persona.
 
+> 🚀 **Nueva versión disponible:** [**FaceHunt 2**](https://github.com/IvanGomezDellOsa/FaceHunt-2) — reescritura completa: ~10x más rápida, con aceleración por GPU, app de escritorio local y resultados más completos.
+
 
 ## Estado del Proyecto
 
